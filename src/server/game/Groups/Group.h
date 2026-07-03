@@ -129,6 +129,13 @@ enum lfgGroupFlags
     GROUP_LFG_FLAG_IS_HEROIC                = 0x004
 };
 
+enum MailItemOnFullInventory
+{
+    MAIL_ITEM_ON_FULL_INVENTORY_DISABLED    = 0,
+    MAIL_ITEM_ON_FULL_INVENTORY_LFG_ONLY    = 1,
+    MAIL_ITEM_ON_FULL_INVENTORY_EVERYWHERE  = 2,
+};
+
 enum DifficultyPreventionChangeType
 {
     DIFFICULTY_PREVENTION_CHANGE_NONE                   = 0,
@@ -199,7 +206,7 @@ public:
     void   RemoveInvite(Player* player);
     void   RemoveAllInvites();
     bool   AddLeaderInvite(Player* player);
-    bool   AddMember(Player* player);
+    bool   AddMember(Player* player, uint8 roles = 0);
     bool   RemoveMember(ObjectGuid guid, const RemoveMethod& method = GROUP_REMOVEMETHOD_DEFAULT, ObjectGuid kicker = ObjectGuid::Empty, const char* reason = nullptr);
     void   ChangeLeader(ObjectGuid guid);
     void   SetLootMethod(LootMethod method);
