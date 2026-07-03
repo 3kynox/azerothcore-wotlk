@@ -327,8 +327,12 @@ BattlegroundJoinCheckErrorCode ToCloud9GrpcHandler::CanPlayerJoinBattlegroundQue
     if (!player)
         return BattlegroundJoinCheckErrorCodePlayerNotFound;
 
-    // has deserter debuff (cf walkline CanJoinToBattleground pré-merge PB ; PB ajoute checks bg-specific incompatibles avec queue handler sans bg)
-    if (player->HasAura(26013))
+
+    // Lets ignore RBAC checks for now.
+    Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_RB);
+
+    // has deserter debuff
+    if (!player->CanJoinToBattleground(bg))
         return BattlegroundJoinCheckErrorCodeResponseIsFalse;
 
     // don't let Death Knights join BG queues when they are not allowed to be teleported yet
