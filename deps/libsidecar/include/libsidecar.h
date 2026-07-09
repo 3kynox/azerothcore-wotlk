@@ -32,6 +32,15 @@ uint64_t TC9GetNextAvailableInstanceGuid(int realmID);
 /* Map loading notification */
 void TC9ReadyToAcceptPlayersFromMaps(uint32_t* maps, int mapsLen);
 
+/* Online status notifications for in-process sessions (e.g. server-side
+ * bots). Sessions that log in through a gateway already get these events
+ * published by the gateway itself — only call these for sessions WITHOUT
+ * a gateway connection, otherwise events are duplicated. The sidecar
+ * fills RealmID and uses its servers-registry ID as GatewayID so that
+ * charserver purges these entries when this game server dies. */
+void TC9CharacterLoggedIn(uint64_t charGUID, const char* charName, uint8_t charRace, uint8_t charClass, uint8_t charGender, uint8_t charLevel, uint32_t charZone, uint32_t charMap, float charPosX, float charPosY, float charPosZ, uint32_t charGuildID, uint32_t accountID);
+void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t charGuildID, uint32_t accountID);
+
 /* Matchmaking notifications */
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID);
 void TC9BattlegroundStatusChanged(uint32_t instanceID, uint8_t status);

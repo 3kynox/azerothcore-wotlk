@@ -26,6 +26,7 @@
 #include "TC9GrpcHandler.h"
 #include "TC9GuildHooks.h"
 #include "UpdateTime.h"
+#include "WorldSession.h"
 #include "WorldSessionMgr.h"
 
 #define AVAILABLE_MAPS_ALL_MAPS ""
@@ -157,6 +158,39 @@ void ToCloud9Sidecar::OnPlayerLeftBattleground(uint64 playerGUID, uint32 realmID
 void ToCloud9Sidecar::OnBattlegroundStatusChanged(uint32 instanceID, uint8 status)
 {
     TC9BattlegroundStatusChanged(instanceID, status);
+}
+
+void ToCloud9Sidecar::OnInProcessCharacterLoggedIn(Player* player)
+{
+    if (!_clusterModeEnabled || !player || !player->GetSession() || !player->GetSession()->IsBot())
+        return;
+
+    TC9CharacterLoggedIn(
+        player->GetGUID().GetCounter(),
+        player->GetName().c_str(),
+        player->getRace(),
+        player->getClass(),
+        player->getGender(),
+        player->GetLevel(),
+        player->GetZoneId(),
+        player->GetMapId(),
+        player->GetPositionX(),
+        player->GetPositionY(),
+        player->GetPositionZ(),
+        player->GetGuildId(),
+        player->GetSession()->GetAccountId());
+}
+
+void ToCloud9Sidecar::OnInProcessCharacterLoggedOut(Player* player)
+{
+    if (!_clusterModeEnabled || !player || !player->GetSession() || !player->GetSession()->IsBot())
+        return;
+
+    TC9CharacterLoggedOut(
+        player->GetGUID().GetCounter(),
+        player->GetName().c_str(),
+        player->GetGuildId(),
+        player->GetSession()->GetAccountId());
 }
 
 void ToCloud9Sidecar::OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize)

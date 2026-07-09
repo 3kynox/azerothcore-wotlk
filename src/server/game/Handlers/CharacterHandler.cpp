@@ -57,6 +57,7 @@
 #include "Tokenize.h"
 #include "Transport.h"
 #include "Util.h"
+#include "TC9Sidecar.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -1147,6 +1148,8 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder const& holder)
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
         sScriptMgr->OnPlayerFirstLogin(pCurrChar);
     }
+
+    sToCloud9Sidecar->OnInProcessCharacterLoggedIn(pCurrChar);
 
     METRIC_EVENT("player_events", "Login", pCurrChar->GetName());
 }

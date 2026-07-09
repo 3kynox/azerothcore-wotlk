@@ -25,6 +25,8 @@
 #define MAX_MAP_ID 800 // Probably too much, but let's lean towards caution.
 #define DEFAULT_NON_CROSSREALM_REALM_ID 0
 
+class Player;
+
 class ToCloud9Sidecar
 {
 private:
@@ -55,6 +57,12 @@ public:
 
     void OnPlayerLeftBattleground(uint64 playerGUID, uint32 realmID, uint32 instanceID);
     void OnBattlegroundStatusChanged(uint32 instanceID, uint8 status);
+
+    // Online status events for in-process sessions (server-side bots).
+    // Gateway sessions already get these events published by the gateway;
+    // these are no-ops for them (and outside cluster mode).
+    void OnInProcessCharacterLoggedIn(Player* player);
+    void OnInProcessCharacterLoggedOut(Player* player);
 
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);

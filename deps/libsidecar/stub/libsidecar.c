@@ -117,6 +117,10 @@ void TC9SetOnMapsReassignedHook(OnMapsReassignedHook h) { panicWithTC9Unavailabl
 //
 void TC9SetMonitoringDataCollectorHandler(MonitoringDataCollectorHandler h) { panicWithTC9Unavailable("TC9SetOnMapsReassignedHook"); }
 
+// TC9CharacterLoggedIn/Out publish online status for in-process sessions (bots)
+void TC9CharacterLoggedIn(uint64_t charGUID, const char* charName, uint8_t charRace, uint8_t charClass, uint8_t charGender, uint8_t charLevel, uint32_t charZone, uint32_t charMap, float charPosX, float charPosY, float charPosZ, uint32_t charGuildID, uint32_t accountID) { panicWithTC9Unavailable("TC9CharacterLoggedIn"); }
+void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t charGuildID, uint32_t accountID) { panicWithTC9Unavailable("TC9CharacterLoggedOut"); }
+
 // TC9PlayerLeftBattleground notifies matchmaking server that player left battleground
 //
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID) { panicWithTC9Unavailable("TC9PlayerLeftBattleground"); }

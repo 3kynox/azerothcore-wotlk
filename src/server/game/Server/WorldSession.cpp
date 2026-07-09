@@ -20,6 +20,7 @@
 */
 
 #include "WorldSession.h"
+#include "TC9Sidecar.h"
 #include "AccountMgr.h"
 #include "BattlegroundMgr.h"
 #include "BanMgr.h"
@@ -792,6 +793,8 @@ void WorldSession::LogoutPlayer(bool save, bool redirecting)
 
             //! Call script hook before deletion
             sScriptMgr->OnPlayerLogout(_player);
+
+            sToCloud9Sidecar->OnInProcessCharacterLoggedOut(_player);
         }
 
         METRIC_EVENT("player_events", "Logout", _player->GetName());
