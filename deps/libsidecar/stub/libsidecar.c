@@ -125,6 +125,8 @@ void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t cha
 void TC9CharacterZoneChanged(uint64_t charGUID, uint32_t mapID, uint32_t areaID, uint32_t zoneID) { panicWithTC9Unavailable("TC9CharacterZoneChanged"); }
 void TC9CharacterLevelChanged(uint64_t charGUID, uint8_t level) { panicWithTC9Unavailable("TC9CharacterLevelChanged"); }
 
+int TC9GroupAcceptInvite(uint64_t playerGUID) { panicWithTC9Unavailable("TC9GroupAcceptInvite"); return -1; }
+
 // TC9NatsPublish/Subscribe generic NATS pub/sub for in-process extensions
 int TC9NatsPublish(const char* subject, const char* payload, int payloadLen) { panicWithTC9Unavailable("TC9NatsPublish"); return -1; }
 int TC9NatsSubscribe(const char* subject, TC9NatsMessageHandler handler) { panicWithTC9Unavailable("TC9NatsSubscribe"); return -1; }

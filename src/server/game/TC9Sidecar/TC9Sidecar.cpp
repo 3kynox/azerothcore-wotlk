@@ -213,6 +213,14 @@ void ToCloud9Sidecar::OnInProcessCharacterLevelChanged(Player* player, uint8 lev
     TC9CharacterLevelChanged(player->GetGUID().GetCounter(), level);
 }
 
+bool ToCloud9Sidecar::GroupAcceptInvite(uint64 playerGuid)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9GroupAcceptInvite(playerGuid) == 0;
+}
+
 bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const& payload)
 {
     if (!_clusterModeEnabled)
