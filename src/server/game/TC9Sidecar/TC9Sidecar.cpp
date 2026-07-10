@@ -193,6 +193,26 @@ void ToCloud9Sidecar::OnInProcessCharacterLoggedOut(Player* player)
         player->GetSession()->GetAccountId());
 }
 
+void ToCloud9Sidecar::OnInProcessCharacterZoneChanged(Player* player, uint32 newZone, uint32 newArea)
+{
+    if (!_clusterModeEnabled || !player || !player->GetSession() || !player->GetSession()->IsBot())
+        return;
+
+    TC9CharacterZoneChanged(
+        player->GetGUID().GetCounter(),
+        player->GetMapId(),
+        newArea,
+        newZone);
+}
+
+void ToCloud9Sidecar::OnInProcessCharacterLevelChanged(Player* player, uint8 level)
+{
+    if (!_clusterModeEnabled || !player || !player->GetSession() || !player->GetSession()->IsBot())
+        return;
+
+    TC9CharacterLevelChanged(player->GetGUID().GetCounter(), level);
+}
+
 void ToCloud9Sidecar::OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize)
 {
     for (int i = 0; i < addedMapsSize; i++)

@@ -34,6 +34,7 @@
 #include "SkillDiscovery.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
+#include "TC9Sidecar.h"
 #include "UpdateFieldFlags.h"
 #include "Vehicle.h"
 #include "Weather.h"
@@ -1282,6 +1283,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
 
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
+
+    sToCloud9Sidecar->OnInProcessCharacterZoneChanged(this, newZone, newArea);
 
     // zone changed, so area changed as well, update it
     UpdateArea(newArea);

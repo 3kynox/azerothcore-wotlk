@@ -64,6 +64,12 @@ public:
     void OnInProcessCharacterLoggedIn(Player* player);
     void OnInProcessCharacterLoggedOut(Player* player);
 
+    // Post-login field updates for in-process sessions — batched by the
+    // sidecar and published as gw.char.chars-updates so charserver (/who),
+    // guildserver and groupserver caches stay fresh.
+    void OnInProcessCharacterZoneChanged(Player* player, uint32 newZone, uint32 newArea);
+    void OnInProcessCharacterLevelChanged(Player* player, uint8 level);
+
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);
 

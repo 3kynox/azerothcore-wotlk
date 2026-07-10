@@ -78,6 +78,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "StringConvert.h"
+#include "TC9Sidecar.h"
 #include "TicketMgr.h"
 #include "Tokenize.h"
 #include "Trainer.h"
@@ -2540,6 +2541,8 @@ void Player::GiveLevel(uint8 level)
             }
 
     SendQuestGiverStatusMultiple();
+
+    sToCloud9Sidecar->OnInProcessCharacterLevelChanged(this, level);
 
     sScriptMgr->OnPlayerLevelChanged(this, oldLevel);
 }

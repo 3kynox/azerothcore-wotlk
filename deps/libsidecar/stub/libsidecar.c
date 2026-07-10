@@ -121,6 +121,10 @@ void TC9SetMonitoringDataCollectorHandler(MonitoringDataCollectorHandler h) { pa
 void TC9CharacterLoggedIn(uint64_t charGUID, const char* charName, uint8_t charRace, uint8_t charClass, uint8_t charGender, uint8_t charLevel, uint32_t charZone, uint32_t charMap, float charPosX, float charPosY, float charPosZ, uint32_t charGuildID, uint32_t accountID) { panicWithTC9Unavailable("TC9CharacterLoggedIn"); }
 void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t charGuildID, uint32_t accountID) { panicWithTC9Unavailable("TC9CharacterLoggedOut"); }
 
+// TC9CharacterZoneChanged/LevelChanged publish post-login field updates for in-process sessions (bots)
+void TC9CharacterZoneChanged(uint64_t charGUID, uint32_t mapID, uint32_t areaID, uint32_t zoneID) { panicWithTC9Unavailable("TC9CharacterZoneChanged"); }
+void TC9CharacterLevelChanged(uint64_t charGUID, uint8_t level) { panicWithTC9Unavailable("TC9CharacterLevelChanged"); }
+
 // TC9PlayerLeftBattleground notifies matchmaking server that player left battleground
 //
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID) { panicWithTC9Unavailable("TC9PlayerLeftBattleground"); }
