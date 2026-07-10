@@ -213,6 +213,22 @@ void ToCloud9Sidecar::OnInProcessCharacterLevelChanged(Player* player, uint8 lev
     TC9CharacterLevelChanged(player->GetGUID().GetCounter(), level);
 }
 
+bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const& payload)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9NatsPublish(subject.c_str(), payload.c_str(), int(payload.size())) == 0;
+}
+
+bool ToCloud9Sidecar::NatsSubscribe(std::string const& subject, void (*handler)(const char*, const char*, int))
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9NatsSubscribe(subject.c_str(), handler) == 0;
+}
+
 void ToCloud9Sidecar::OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize)
 {
     for (int i = 0; i < addedMapsSize; i++)

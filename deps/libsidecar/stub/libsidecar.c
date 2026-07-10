@@ -125,6 +125,10 @@ void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t cha
 void TC9CharacterZoneChanged(uint64_t charGUID, uint32_t mapID, uint32_t areaID, uint32_t zoneID) { panicWithTC9Unavailable("TC9CharacterZoneChanged"); }
 void TC9CharacterLevelChanged(uint64_t charGUID, uint8_t level) { panicWithTC9Unavailable("TC9CharacterLevelChanged"); }
 
+// TC9NatsPublish/Subscribe generic NATS pub/sub for in-process extensions
+int TC9NatsPublish(const char* subject, const char* payload, int payloadLen) { panicWithTC9Unavailable("TC9NatsPublish"); return -1; }
+int TC9NatsSubscribe(const char* subject, TC9NatsMessageHandler handler) { panicWithTC9Unavailable("TC9NatsSubscribe"); return -1; }
+
 // TC9PlayerLeftBattleground notifies matchmaking server that player left battleground
 //
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID) { panicWithTC9Unavailable("TC9PlayerLeftBattleground"); }

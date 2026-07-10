@@ -48,6 +48,13 @@ void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t cha
 void TC9CharacterZoneChanged(uint64_t charGUID, uint32_t mapID, uint32_t areaID, uint32_t zoneID);
 void TC9CharacterLevelChanged(uint64_t charGUID, uint8_t level);
 
+/* Generic NATS pub/sub for in-process extensions. Subscribe callbacks run
+ * on the thread that calls TC9ProcessEventsHooks. Call after TC9InitLib.
+ * Both return 0 on success, -1 on error. */
+typedef void (*TC9NatsMessageHandler)(const char* subject, const char* payload, int payloadLen);
+int TC9NatsPublish(const char* subject, const char* payload, int payloadLen);
+int TC9NatsSubscribe(const char* subject, TC9NatsMessageHandler handler);
+
 /* Matchmaking notifications */
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID);
 void TC9BattlegroundStatusChanged(uint32_t instanceID, uint8_t status);

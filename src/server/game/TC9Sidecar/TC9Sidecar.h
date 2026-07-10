@@ -70,6 +70,12 @@ public:
     void OnInProcessCharacterZoneChanged(Player* player, uint32 newZone, uint32 newArea);
     void OnInProcessCharacterLevelChanged(Player* player, uint8 level);
 
+    // Generic NATS pub/sub (single choke point for modules, e.g. playerbots
+    // cross-shard coordination). No-ops outside cluster mode. Subscribe
+    // callbacks run on the world thread (ProcessHooks).
+    bool NatsPublish(std::string const& subject, std::string const& payload);
+    bool NatsSubscribe(std::string const& subject, void (*handler)(const char* subject, const char* payload, int payloadLen));
+
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);
 
