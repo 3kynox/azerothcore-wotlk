@@ -59,6 +59,7 @@ int TC9NatsSubscribe(const char* subject, TC9NatsMessageHandler handler);
  * service on their behalf). Blocking gRPC call, do not call from map update
  * threads. Returns 0 on success, -1 on error. */
 int TC9GroupAcceptInvite(uint64_t playerGUID);
+int TC9GroupLeave(uint64_t playerGUID);
 
 /* Matchmaking notifications */
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID);

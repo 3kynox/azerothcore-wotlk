@@ -75,6 +75,7 @@ public:
     // callbacks run on the world thread (ProcessHooks).
     bool NatsPublish(std::string const& subject, std::string const& payload);
     bool GroupAcceptInvite(uint64 playerGuid);
+    bool GroupLeave(uint64 playerGuid);
     bool NatsSubscribe(std::string const& subject, void (*handler)(const char* subject, const char* payload, int payloadLen));
 
 private:
