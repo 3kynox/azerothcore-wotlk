@@ -61,6 +61,12 @@ int TC9NatsSubscribe(const char* subject, TC9NatsMessageHandler handler);
 int TC9GroupAcceptInvite(uint64_t playerGUID);
 int TC9GroupLeave(uint64_t playerGUID);
 
+/* Guild creation through the guild service (it allocates the id, inserts
+ * guild/ranks/leader rows, hydrates its cache and publishes guild.created).
+ * Blocking gRPC call, do not call from map update threads. Returns 0 on
+ * success and stores the created guild id in *guildID, -1 on error. */
+int TC9GuildCreate(uint64_t leaderGUID, const char* name, uint64_t* guildID);
+
 /* Matchmaking notifications */
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID);
 void TC9BattlegroundStatusChanged(uint32_t instanceID, uint8_t status);

@@ -229,6 +229,14 @@ bool ToCloud9Sidecar::GroupLeave(uint64 playerGuid)
     return TC9GroupLeave(playerGuid) == 0;
 }
 
+bool ToCloud9Sidecar::GuildCreate(uint64 leaderGuid, std::string const& name, uint64& guildId)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9GuildCreate(leaderGuid, name.c_str(), &guildId) == 0;
+}
+
 bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const& payload)
 {
     if (!_clusterModeEnabled)
