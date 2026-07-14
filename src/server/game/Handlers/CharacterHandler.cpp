@@ -878,8 +878,21 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder const& holder)
     }
     else
     {
-        pCurrChar->SetInGuild(0);
-        pCurrChar->SetRank(0);
+        // The guildserver owns guild state, but PLAYER_GUILDID still has to
+        // be set by this worldserver or the client never shows the guild UI
+        // again after a reconnect. Local GuildMgr/CharacterCache can be
+        // stale for guilds touched since this shard booted, so read the
+        // shared characters DB directly.
+        uint32 guildId = 0;
+        uint8 rankId = 0;
+        if (QueryResult guildResult = CharacterDatabase.Query("SELECT guildid, `rank` FROM guild_member WHERE guid = {}", pCurrChar->GetGUID().GetCounter()))
+        {
+            Field* fields = guildResult->Fetch();
+            guildId = fields[0].Get<uint32>();
+            rankId = fields[1].Get<uint8>();
+        }
+        pCurrChar->SetInGuild(guildId);
+        pCurrChar->SetRank(rankId);
     }
 
     data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4 + 4);
