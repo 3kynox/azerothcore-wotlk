@@ -77,6 +77,8 @@ public:
     bool GroupAcceptInvite(uint64 playerGuid);
     bool GroupLeave(uint64 playerGuid);
     bool GuildCreate(uint64 leaderGuid, std::string const& name, uint64& guildId);
+    bool GuildAcceptInvite(uint64 guid, std::string const& name, uint32 lvl,
+        uint32 race, uint32 classId, uint32 gender, uint32 areaId, uint64 accountId);
     bool NatsSubscribe(std::string const& subject, void (*handler)(const char* subject, const char* payload, int payloadLen));
 
 private:

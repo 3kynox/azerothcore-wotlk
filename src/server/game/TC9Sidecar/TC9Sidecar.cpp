@@ -237,6 +237,15 @@ bool ToCloud9Sidecar::GuildCreate(uint64 leaderGuid, std::string const& name, ui
     return TC9GuildCreate(leaderGuid, name.c_str(), &guildId) == 0;
 }
 
+bool ToCloud9Sidecar::GuildAcceptInvite(uint64 guid, std::string const& name, uint32 lvl,
+    uint32 race, uint32 classId, uint32 gender, uint32 areaId, uint64 accountId)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9GuildAcceptInvite(guid, name.c_str(), lvl, race, classId, gender, areaId, accountId) == 0;
+}
+
 bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const& payload)
 {
     if (!_clusterModeEnabled)

@@ -66,6 +66,8 @@ int TC9GroupLeave(uint64_t playerGUID);
  * Blocking gRPC call, do not call from map update threads. Returns 0 on
  * success and stores the created guild id in *guildID, -1 on error. */
 int TC9GuildCreate(uint64_t leaderGUID, const char* name, uint64_t* guildID);
+int TC9GuildAcceptInvite(uint64_t guid, const char* name, uint32_t lvl,
+    uint32_t race, uint32_t classID, uint32_t gender, uint32_t areaID, uint64_t accountID);
 
 /* Matchmaking notifications */
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID);
