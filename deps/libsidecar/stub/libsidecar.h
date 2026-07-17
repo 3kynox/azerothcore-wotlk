@@ -63,6 +63,12 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 1 "cgo-generated-wrapper"
 
+#line 3 "petition-api.go"
+
+#include "petition-api.h"
+
+#line 1 "cgo-generated-wrapper"
+
 #line 3 "player-interactions-api.go"
 
 #include "player-interactions-api.h"
@@ -195,6 +201,14 @@ extern void TC9SetOnGuildMemberRemovedHook(OnGuildMemberRemovedHook h);
 // TC9SetOnGuildMemberLeftHook sets hook for guild member left event.
 //
 extern void TC9SetOnGuildMemberLeftHook(OnGuildMemberLeftHook h);
+
+// TC9SetOnGuildCreatedHook sets hook for guild created event.
+//
+extern void TC9SetOnGuildCreatedHook(OnGuildCreatedHook h);
+
+// TC9SetCanTurnInGuildPetitionHandler sets handler for guild petition turn-in validation.
+//
+extern void TC9SetCanTurnInGuildPetitionHandler(CanTurnInGuildPetitionHandler h);
 
 // TC9SetOnMapsReassignedHook sets hook for maps reassigning by servers registry event.
 //
