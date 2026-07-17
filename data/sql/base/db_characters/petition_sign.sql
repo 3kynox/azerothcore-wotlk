@@ -27,10 +27,9 @@ CREATE TABLE `petition_sign` (
   `playerguid` int unsigned NOT NULL DEFAULT '0',
   `player_account` int unsigned NOT NULL DEFAULT '0',
   `type` tinyint unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`petitionguid`,`playerguid`),
+  PRIMARY KEY (`petition_id`,`playerguid`),
   KEY `Idx_playerguid` (`playerguid`),
-  KEY `Idx_ownerguid` (`ownerguid`),
-  KEY `idx_petition_id_player` (`petition_id`,`playerguid`)
+  KEY `Idx_ownerguid` (`ownerguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Guild System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

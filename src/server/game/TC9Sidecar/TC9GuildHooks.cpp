@@ -16,6 +16,7 @@
  */
 
 #include "TC9GuildHooks.h"
+#include "CharacterDatabase.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Item.h"
@@ -66,12 +67,22 @@ void ToCloud9GuildHooks::OnGuildCreated(uint64 guildId, char* guildName, uint64 
     for (int i = 0; i < memberGuidsSize; ++i)
         members.emplace_back(ObjectGuid(memberGuids[i]));
 
-    // Destroy the charter item before the petition store is purged (the item
-    // lives on the shard where the leader is online).
+    // Snapshot the charter before any petition cache scrubbing below: the
+    // by-id purge at the end needs the petition id, and
+    // RemovePetitionsAndSigns drops the petition from the local store.
+    uint32 petitionId = 0;
+    ObjectGuid petitionItemGuid;
+    if (Petition const* petition = sPetitionMgr->GetPetitionByOwnerWithType(leader, GUILD_CHARTER_TYPE))
+    {
+        petitionId = petition->petitionId;
+        petitionItemGuid = petition->petitionGuid;
+    }
+
+    // Destroy the charter item (it lives on the shard where the leader is
+    // online).
     if (Player* player = ObjectAccessor::FindPlayer(leader))
-        if (Petition const* petition = sPetitionMgr->GetPetitionByOwnerWithType(leader, GUILD_CHARTER_TYPE))
-            if (Item* item = player->GetItemByGuid(petition->petitionGuid))
-                player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+        if (Item* item = player->GetItemByGuid(petitionItemGuid))
+            player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 
     Guild* guild = new Guild();
     if (!guild->MirrorClusterCreated(uint32(guildId), guildName ? guildName : "", leader, members))
@@ -81,10 +92,33 @@ void ToCloud9GuildHooks::OnGuildCreated(uint64 guildId, char* guildName, uint64 
     }
     sGuildMgr->AddGuild(guild);
 
-    // Same cleanup the core turn-in/AddMember path performs: the leader's
-    // charter rows and the members' signatures. Database deletes are
-    // idempotent across shards, the local petition caches need it everywhere.
+    // Same cleanup the core Guild::Create/AddMember path performs: scrubs the
+    // members' signatures from the in-memory maps and notifies charter owners.
     Player::RemovePetitionsAndSigns(leader, GUILD_CHARTER_TYPE);
     for (ObjectGuid memberGuid : members)
         Player::RemovePetitionsAndSigns(memberGuid, GUILD_CHARTER_TYPE);
+
+    // By-id purge, same as the core turn-in handler. The type-filtered DELETE
+    // in RemovePetitionsAndSigns never matches petition_sign rows (the sign
+    // insert stopped writing `type` with the petition_id schema), so without
+    // this the signature rows leak — and the (petitionguid=0, playerguid)
+    // primary key then rejects any future sign by the same characters.
+    // Deletes are idempotent across shards; the store cleanup matters on every
+    // shard that has the charter loaded.
+    if (petitionId)
+    {
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PETITION_BY_ID);
+        stmt->SetData(0, petitionId);
+        trans->Append(stmt);
+
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PETITION_SIGNATURE_BY_ID);
+        stmt->SetData(0, petitionId);
+        trans->Append(stmt);
+
+        CharacterDatabase.CommitTransaction(trans);
+
+        sPetitionMgr->RemovePetition(petitionItemGuid);
+    }
 }
