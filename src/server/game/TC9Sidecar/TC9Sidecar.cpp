@@ -249,6 +249,28 @@ bool ToCloud9Sidecar::GuildAcceptInvite(uint64 guid, std::string const& name, ui
     return TC9GuildAcceptInvite(guid, name.c_str(), lvl, race, classId, gender, areaId, accountId) == 0;
 }
 
+bool ToCloud9Sidecar::BattlegroundQueueDataForLocalPlayer(uint64 playerGuid, uint32& bgTypeId,
+    uint32& instanceId, uint32& mapId, bool& isAssignedToThisServer)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    int isLocal = 0;
+    if (TC9BattlegroundQueueDataForLocalPlayer(playerGuid, &bgTypeId, &instanceId, &mapId, &isLocal) != 0)
+        return false;
+
+    isAssignedToThisServer = isLocal != 0;
+    return true;
+}
+
+bool ToCloud9Sidecar::NotifyPlayerJoinedBattleground(uint64 playerGuid, uint32 instanceId)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9PlayerJoinedBattleground(playerGuid, instanceId) == 0;
+}
+
 bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const& payload)
 {
     if (!_clusterModeEnabled)

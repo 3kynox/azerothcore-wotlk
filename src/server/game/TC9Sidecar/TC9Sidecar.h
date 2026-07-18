@@ -81,6 +81,14 @@ public:
         uint32 race, uint32 classId, uint32 gender, uint32 areaId, uint64 accountId);
     bool NatsSubscribe(std::string const& subject, void (*handler)(const char* subject, const char* payload, int payloadLen));
 
+    // BG queue slot of an invited in-process player (no gateway session to
+    // accept the invite). isAssignedToThisServer tells whether the assigned
+    // battleground instance runs on THIS worldserver. Blocking gRPC calls,
+    // keep them off the world/map-update threads.
+    bool BattlegroundQueueDataForLocalPlayer(uint64 playerGuid, uint32& bgTypeId,
+        uint32& instanceId, uint32& mapId, bool& isAssignedToThisServer);
+    bool NotifyPlayerJoinedBattleground(uint64 playerGuid, uint32 instanceId);
+
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);
 

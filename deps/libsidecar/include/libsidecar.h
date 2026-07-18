@@ -74,6 +74,19 @@ int TC9GuildAcceptInvite(uint64_t guid, const char* name, uint32_t lvl,
 void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t instanceID);
 void TC9BattlegroundStatusChanged(uint32_t instanceID, uint8_t status);
 
+/* Query the queue slot assigned to an invited player (matchmaking owns the BG
+ * queues cluster-wide; in-process sessions have no gateway to accept invites).
+ * outIsAssignedToThisServer is 1 when the assigned battleground runs on THIS
+ * worldserver. Blocking gRPC call, do not call from map update threads.
+ * 0 on success, -1 on error or when no battleground is assigned yet. */
+int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgTypeID,
+    uint32_t* outInstanceID, uint32_t* outMapID, int* outIsAssignedToThisServer);
+
+/* Confirm to matchmaking that an in-process player entered the battleground
+ * (the gateway does this for real players after AddPlayersToBattleground).
+ * Blocking gRPC call, do not call from map update threads. 0 on success. */
+int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID);
+
 /* Event hooks registration */
 void TC9SetOnGroupCreatedHook(OnGroupCreatedHook h);
 void TC9SetOnGroupMemberAddedHook(OnGroupMemberAddedHook h);

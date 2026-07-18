@@ -148,6 +148,15 @@ void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uint32_t i
 //
 void TC9BattlegroundStatusChanged(uint32_t instanceID, uint8_t status) { panicWithTC9Unavailable("TC9BattlegroundStatusChanged"); }
 
+// TC9BattlegroundQueueDataForLocalPlayer queries the queue slot assigned to an invited player
+//
+int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgTypeID,
+    uint32_t* outInstanceID, uint32_t* outMapID, int* outIsAssignedToThisServer) { panicWithTC9Unavailable("TC9BattlegroundQueueDataForLocalPlayer"); return -1; }
+
+// TC9PlayerJoinedBattleground confirms to matchmaking that an in-process player entered the battleground
+//
+int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID) { panicWithTC9Unavailable("TC9PlayerJoinedBattleground"); return -1; }
+
 // TC9SetCanPlayerJoinBattlegroundQueueHandler sets handler for checking if player can join to battleground queue.
 //
 void TC9SetCanPlayerJoinBattlegroundQueueHandler(CanPlayerJoinBattlegroundQueueHandler h) { panicWithTC9Unavailable("TC9SetCanPlayerJoinBattlegroundQueueHandler"); }

@@ -256,6 +256,15 @@ extern void TC9PlayerLeftBattleground(uint64_t playerGUID, uint32_t realmID, uin
 //
 extern void TC9BattlegroundStatusChanged(uint32_t instanceID, uint8_t status);
 
+// TC9BattlegroundQueueDataForLocalPlayer queries the queue slot assigned to an invited player
+//
+extern int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgTypeID,
+    uint32_t* outInstanceID, uint32_t* outMapID, int* outIsAssignedToThisServer);
+
+// TC9PlayerJoinedBattleground confirms to matchmaking that an in-process player entered the battleground
+//
+extern int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID);
+
 // TC9SetMonitoringDataCollectorHandler sets handler for getting data to handle monitoring request.
 //
 extern void TC9SetMonitoringDataCollectorHandler(MonitoringDataCollectorHandler h);
