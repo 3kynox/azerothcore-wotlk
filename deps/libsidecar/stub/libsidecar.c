@@ -157,6 +157,11 @@ int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgT
 //
 int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID) { panicWithTC9Unavailable("TC9PlayerJoinedBattleground"); return -1; }
 
+// TC9EnqueueLocalPlayerToBattleground enqueues a solo in-process player into a battleground queue
+//
+int TC9EnqueueLocalPlayerToBattleground(uint64_t playerGUID, uint32_t playerLvl,
+    uint32_t bgTypeID, uint32_t pvpTeamID) { panicWithTC9Unavailable("TC9EnqueueLocalPlayerToBattleground"); return -1; }
+
 // TC9SetCanPlayerJoinBattlegroundQueueHandler sets handler for checking if player can join to battleground queue.
 //
 void TC9SetCanPlayerJoinBattlegroundQueueHandler(CanPlayerJoinBattlegroundQueueHandler h) { panicWithTC9Unavailable("TC9SetCanPlayerJoinBattlegroundQueueHandler"); }

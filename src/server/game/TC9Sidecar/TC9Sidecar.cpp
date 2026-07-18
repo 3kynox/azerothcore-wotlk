@@ -271,6 +271,15 @@ bool ToCloud9Sidecar::NotifyPlayerJoinedBattleground(uint64 playerGuid, uint32 i
     return TC9PlayerJoinedBattleground(playerGuid, instanceId) == 0;
 }
 
+bool ToCloud9Sidecar::EnqueueLocalPlayerToBattleground(uint64 playerGuid, uint32 playerLvl,
+    uint32 bgTypeId, uint32 pvpTeamId)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9EnqueueLocalPlayerToBattleground(playerGuid, playerLvl, bgTypeId, pvpTeamId) == 0;
+}
+
 bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const& payload)
 {
     if (!_clusterModeEnabled)

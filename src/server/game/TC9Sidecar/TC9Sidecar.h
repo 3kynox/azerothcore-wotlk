@@ -88,6 +88,10 @@ public:
     bool BattlegroundQueueDataForLocalPlayer(uint64 playerGuid, uint32& bgTypeId,
         uint32& instanceId, uint32& mapId, bool& isAssignedToThisServer);
     bool NotifyPlayerJoinedBattleground(uint64 playerGuid, uint32 instanceId);
+    // Same enqueue RPC the gateway issues for real players (solo queue,
+    // pvpTeamId: 1 alliance, 2 horde).
+    bool EnqueueLocalPlayerToBattleground(uint64 playerGuid, uint32 playerLvl,
+        uint32 bgTypeId, uint32 pvpTeamId);
 
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);

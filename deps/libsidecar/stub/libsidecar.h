@@ -265,6 +265,11 @@ extern int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t*
 //
 extern int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID);
 
+// TC9EnqueueLocalPlayerToBattleground enqueues a solo in-process player into a battleground queue
+//
+extern int TC9EnqueueLocalPlayerToBattleground(uint64_t playerGUID, uint32_t playerLvl,
+    uint32_t bgTypeID, uint32_t pvpTeamID);
+
 // TC9SetMonitoringDataCollectorHandler sets handler for getting data to handle monitoring request.
 //
 extern void TC9SetMonitoringDataCollectorHandler(MonitoringDataCollectorHandler h);

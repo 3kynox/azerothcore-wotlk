@@ -87,6 +87,12 @@ int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgT
  * Blocking gRPC call, do not call from map update threads. 0 on success. */
 int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID);
 
+/* Enqueue a solo in-process player into a battleground queue — the same RPC
+ * the gateway issues for real players (pvpTeamID: 1 alliance, 2 horde).
+ * Blocking gRPC call, do not call from map update threads. 0 on success. */
+int TC9EnqueueLocalPlayerToBattleground(uint64_t playerGUID, uint32_t playerLvl,
+    uint32_t bgTypeID, uint32_t pvpTeamID);
+
 /* Event hooks registration */
 void TC9SetOnGroupCreatedHook(OnGroupCreatedHook h);
 void TC9SetOnGroupMemberAddedHook(OnGroupMemberAddedHook h);
