@@ -121,6 +121,27 @@ GetPlayerItemByPosResponse ToCloud9GrpcHandler::GetPlayerItemByPos(uint64 player
     return resp;
 }
 
+SetPlayerGuildFieldsResponse ToCloud9GrpcHandler::SetPlayerGuildFields(uint64 playerGuid, uint32 guildId, uint32 rank)
+{
+    SetPlayerGuildFieldsResponse resp;
+    resp.errorCode = PlayerGuildErrorCodeNoError;
+    resp.applied = false;
+
+    Player* player = ObjectAccessor::FindPlayer(ObjectGuid(playerGuid));
+    if (!player)
+        return resp;
+
+    // The client gates the guild control UI on these public unit fields; in
+    // cluster mode the guild service owns membership, so refresh them on the
+    // live object to avoid a relog after a rank change.
+    if (player->GetGuildId() != guildId)
+        player->SetInGuild(guildId);
+    player->SetRank(static_cast<uint8>(rank));
+
+    resp.applied = true;
+    return resp;
+}
+
 RemoveItemsWithGuidsFromPlayerResponse ToCloud9GrpcHandler::RemoveItemsWithGuidsFromPlayer(uint64 playerGuid, uint64* items, int itemsLen, uint64 assignToPlayerGuid)
 {
     Player *player = ObjectAccessor::FindPlayer(ObjectGuid(playerGuid));

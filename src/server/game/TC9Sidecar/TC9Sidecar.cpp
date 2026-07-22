@@ -106,6 +106,8 @@ void ToCloud9Sidecar::SetupGrpcHandlers()
     TC9SetGetMoneyForPlayerHandler(&ToCloud9GrpcHandler::GetMoneyForPlayer);
     TC9SetModifyMoneyForPlayerHandler(&ToCloud9GrpcHandler::ModifyMoneyForPlayer);
 
+    TC9SetSetPlayerGuildFieldsHandler(&ToCloud9GrpcHandler::SetPlayerGuildFields);
+
     TC9SetCanTurnInGuildPetitionHandler(&ToCloud9GrpcHandler::CanTurnInGuildPetition);
 
     TC9SetCanPlayerInteractWithGOAndTypeHandler(&ToCloud9GrpcHandler::CanPlayerInteractWithGOAndType);
