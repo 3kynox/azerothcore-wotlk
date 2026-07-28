@@ -46,7 +46,6 @@ class LoadPetFromDBQueryHolder;
 class Object;
 class Pet;
 class Player;
-class LoginQueryHolder;
 class Quest;
 class SpellCastTargets;
 class Unit;
@@ -289,6 +288,20 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_2v2_TYPE                   = 2,
     ARENA_TEAM_CHARTER_3v3_TYPE                   = 3,
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
+};
+
+class LoginQueryHolder : public CharacterDatabaseQueryHolder
+{
+    private:
+        uint32 m_accountId;
+        ObjectGuid m_guid;
+
+    public:
+        LoginQueryHolder(uint32 accountId, ObjectGuid guid);
+
+        ObjectGuid GetGuid() const { return m_guid; }
+        uint32 GetAccountId() const { return m_accountId; }
+        bool Initialize();
 };
 
 constexpr Seconds PLAY_TIME_LIMIT_APPROACHING_PARTIAL = Hours(2) + Minutes(30);
