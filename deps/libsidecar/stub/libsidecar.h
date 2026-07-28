@@ -11,6 +11,8 @@
 #include "events-servers-registry.h"
 #include "monitoring.h"
 #include "player-interactions-api.h"
+#include "petition-api.h"
+#include "player-guild-api.h"
 #include "player-items-api.h"
 #include "player-money-api.h"
 

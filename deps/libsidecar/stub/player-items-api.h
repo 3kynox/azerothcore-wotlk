@@ -65,4 +65,15 @@ typedef PlayerItemErrorCode (*AddExistingItemToPlayerHandler) (AddExistingItemTo
 void SetAddExistingItemToPlayerHandler(AddExistingItemToPlayerHandler h);
 PlayerItemErrorCode CallAddExistingItemToPlayerHandler(AddExistingItemToPlayerRequest*);
 
+
+typedef struct {
+    int errorCode;
+    bool found;
+    PlayerItem item;
+} GetPlayerItemByPosResponse;
+
+typedef GetPlayerItemByPosResponse (*GetPlayerItemByPosHandler) (uint64_t /*player_guid*/, uint8_t /*bag*/, uint8_t /*slot*/);
+void SetGetPlayerItemByPosHandler(GetPlayerItemByPosHandler h);
+GetPlayerItemByPosResponse CallGetPlayerItemByPosHandler(uint64_t player_guid, uint8_t bag, uint8_t slot);
+
 #endif

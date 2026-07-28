@@ -42,3 +42,17 @@ PlayerItemErrorCode CallAddExistingItemToPlayerHandler(AddExistingItemToPlayerRe
 
     return addExistingItemToPlayerHandler(r);
 }
+
+static GetPlayerItemByPosHandler getPlayerItemByPosHandler = 0;
+
+void SetGetPlayerItemByPosHandler(GetPlayerItemByPosHandler h) { getPlayerItemByPosHandler = h; }
+
+GetPlayerItemByPosResponse CallGetPlayerItemByPosHandler(uint64_t player_guid, uint8_t bag, uint8_t slot) {
+    GetPlayerItemByPosResponse r;
+    r.found = false;
+    if (getPlayerItemByPosHandler == 0) {
+        r.errorCode = PlayerItemErrorCodeNoHandler;
+        return r;
+    }
+    return getPlayerItemByPosHandler(player_guid, bag, slot);
+}

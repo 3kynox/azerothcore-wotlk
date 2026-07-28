@@ -173,3 +173,9 @@ void TC9SetCanPlayerJoinBattlegroundQueueHandler(CanPlayerJoinBattlegroundQueueH
 // TC9SetCanPlayerTeleportToBattlegroundHandler sets handler for checking if player can teleport to battleground.
 //
 void TC9SetCanPlayerTeleportToBattlegroundHandler(CanPlayerTeleportToBattlegroundHandler h) { panicWithTC9Unavailable("TC9SetCanPlayerTeleportToBattlegroundHandler"); }
+
+// Extensions Kernel Panik absentes du stub amont (miroir obligatoire du header reel).
+int TC9GuildAcceptInvite(uint64_t guid, const char* name, uint32_t lvl,
+    uint32_t race, uint32_t classID, uint32_t gender, uint32_t areaID, uint64_t accountID) { panicWithTC9Unavailable("TC9GuildAcceptInvite"); return -1; }
+void TC9SetGetPlayerItemByPosHandler(GetPlayerItemByPosHandler h) { panicWithTC9Unavailable("TC9SetGetPlayerItemByPosHandler"); }
+void TC9SetSetPlayerGuildFieldsHandler(SetPlayerGuildFieldsHandler h) { panicWithTC9Unavailable("TC9SetSetPlayerGuildFieldsHandler"); }
