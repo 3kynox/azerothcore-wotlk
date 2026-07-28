@@ -46,6 +46,7 @@ class LoadPetFromDBQueryHolder;
 class Object;
 class Pet;
 class Player;
+class LoginQueryHolder;
 class Quest;
 class SpellCastTargets;
 class Unit;
