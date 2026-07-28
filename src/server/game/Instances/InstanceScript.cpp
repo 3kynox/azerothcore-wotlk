@@ -31,6 +31,7 @@
 #include "RBAC.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "TC9Sidecar.h"
 #include "WorldSession.h"
 
 BossBoundaryData::~BossBoundaryData()
@@ -152,7 +153,7 @@ bool InstanceScript::IsEncounterInProgress() const
     return false;
 }
 
-void InstanceScript::LoadBossBoundaries(const BossBoundaryData& data)
+void InstanceScript::LoadBossBoundaries(BossBoundaryData const& data)
 {
     for (BossBoundaryEntry const& entry : data)
         if (entry.bossId < bosses.size())
@@ -170,7 +171,7 @@ void InstanceScript::SetHeaders(std::string const& dataHeaders)
     }
 }
 
-void InstanceScript::LoadMinionData(const MinionData* data)
+void InstanceScript::LoadMinionData(MinionData const* data)
 {
     while (data->entry)
     {
@@ -182,7 +183,7 @@ void InstanceScript::LoadMinionData(const MinionData* data)
     LOG_DEBUG("scripts.ai", "InstanceScript::LoadMinionData: {} minions loaded.", uint64(minions.size()));
 }
 
-void InstanceScript::LoadDoorData(const DoorData* data)
+void InstanceScript::LoadDoorData(DoorData const* data)
 {
     while (data->entry)
     {
@@ -465,7 +466,7 @@ void InstanceScript::DoForAllMinions(uint32 id, std::function<void(Creature*)> e
     }
 }
 
-void InstanceScript::Load(const char* data)
+void InstanceScript::Load(char const* data)
 {
     if (!data)
     {

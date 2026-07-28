@@ -18,6 +18,10 @@
 #ifndef _ASYNC_TASK_H
 #define _ASYNC_TASK_H
 
+#include "Errors.h"
+#include "Log.h"
+#include <chrono>
+#include <functional>
 #include <future>
 
 template <typename T>
@@ -48,8 +52,19 @@ public:
             // Check if the asynchronous task is ready
             if (asyncTask.valid() && asyncTask.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
             {
-                // Invoke the callback with the result of the asynchronous task
-                callbackFunc(asyncTask.get());
+                // get() rethrows anything the async function threw. Swallowing it
+                // would wedge the cluster handoff (the completion callback signals
+                // map readiness to the registry), so fail fast with context and let
+                // the registry's crash recovery rebalance this node.
+                try
+                {
+                    callbackFunc(asyncTask.get());
+                }
+                catch (std::exception const& e)
+                {
+                    LOG_ERROR("server.tc9", "AsyncTask failed: {}", e.what());
+                    ABORT("AsyncTask failed: {}", e.what());
+                }
                 isReady = true;
                 return true;
             }
@@ -59,10 +74,12 @@ public:
 
     void ExecuteAsync()
     {
-        // Execute the asynchronous task
-        asyncTask = std::async(std::launch::async, [this]
+        // Capture the function by value so a moved AsyncTask does not leave
+        // the in-flight async holding a dangling this pointer.
+        AsyncFunction fn = asyncFunc;
+        asyncTask = std::async(std::launch::async, [fn = std::move(fn)]() mutable
         {
-            return asyncFunc();
+            return fn();
         });
     }
 

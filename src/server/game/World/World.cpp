@@ -20,8 +20,6 @@
 */
 
 #include "World.h"
-#include <cmath>
-#include <boost/asio/ip/address.hpp>
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AddonMgr.h"
@@ -43,8 +41,9 @@
 #include "CreatureAIRegistry.h"
 #include "CreatureGroups.h"
 #include "CreatureTextMgr.h"
-#include "DatabaseEnv.h"
 #include "DBCStores.h"
+#include "DBUpdater.h"
+#include "DatabaseEnv.h"
 #include "DisableMgr.h"
 #include "DynamicVisibility.h"
 #include "GameEventMgr.h"
@@ -63,6 +62,7 @@
 #include "LootItemStorage.h"
 #include "LootMgr.h"
 #include "M2Stores.h"
+#include "MailMgr.h"
 #include "MapMgr.h"
 #include "Metric.h"
 #include "MotdMgr.h"
@@ -269,7 +269,7 @@ void World::LoadConfigSettings(bool reload)
 #if AC_PLATFORM == AC_PLATFORM_UNIX || AC_PLATFORM == AC_PLATFORM_APPLE
     if (dataPath[0] == '~')
     {
-        const char* home = getenv("HOME");
+        char const* home = getenv("HOME");
         if (home)
             dataPath.replace(0, 1, home);
     }
@@ -851,7 +851,7 @@ void World::SetInitialWorldSettings()
     ///- Handle outdated emails (delete/return)
     LOG_INFO("server.loading", "Returning Old Mails...");
     LOG_INFO("server.loading", " ");
-    sObjectMgr->ReturnOrDeleteOldMails(false);
+    sMailMgr->ReturnOrDeleteOldMails(false);
 
     ///- Load AutoBroadCast
     LOG_INFO("server.loading", "Loading Autobroadcasts...");
@@ -1061,6 +1061,13 @@ void World::SetInitialWorldSettings()
     if (sConfigMgr->isDryRun())
     {
         sMapMgr->UnloadAll();
+
+        if (uint32 failed = DBUpdaterUtil::GetFailedUpdateCount())
+        {
+            LOG_FATAL("server.loading", "AzerothCore Dry Run Completed With {} Failed Database Update(s), Terminating.", failed);
+            exit(1);
+        }
+
         LOG_INFO("server.loading", "AzerothCore Dry Run Completed, Terminating.");
         exit(0);
     }
@@ -1202,7 +1209,7 @@ void World::Update(uint32 diff)
 
     if (currentGameTime > _mail_expire_check_timer)
     {
-        sObjectMgr->ReturnOrDeleteOldMails(true);
+        sMailMgr->ReturnOrDeleteOldMails(true);
         _mail_expire_check_timer = currentGameTime + 6h;
     }
 

@@ -1,11 +1,22 @@
-//
-//  TC9GroupHooks.cpp
-//  game
-//
-//  Created by Anton Popovichenko on 26/08/2023.
-//
+/*
+ * This file is part of the AzerothCore Project. See AUTHORS file for Copyright information
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License as published by the
+ * Free Software Foundation; either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "TC9GroupHooks.h"
+#include "CharacterCache.h"
 #include "Group.h"
 #include "GroupMgr.h"
 #include "Log.h"
@@ -14,20 +25,32 @@ void ToCloud9GroupHooks::OnGroupCreated(EventObjectGroup *group)
 {
     LOG_INFO("server", "Group created. ID: {}; Leader: {}.", group->guid, group->leader);
 
+    // Idempotent under sidecar event redelivery: a replayed create must not leak a second Group.
+    if (sGroupMgr->GetGroupByGUID(group->guid))
+        return;
+
     Group* g = new Group();
     g->m_guid = ObjectGuid(HighGuid::Group, group->guid);
     g->m_leaderGuid = ObjectGuid(group->leader);
+    sCharacterCache->GetCharacterNameByGuid(g->m_leaderGuid, g->m_leaderName);
     g->m_dungeonDifficulty = Difficulty(group->difficulty);
     g->m_raidDifficulty = Difficulty(group->raidDifficulty);
     g->m_lootMethod = LootMethod(group->lootMethod);
     g->m_lootThreshold = ItemQualities(group->lootThreshold);
+    g->m_looterGuid = ObjectGuid(group->looterGuid);
     g->m_masterLooterGuid = ObjectGuid(group->masterLooterGuid);
     g->m_groupType = GroupType(group->groupType);
+
+    // Must precede member insertion: it zeroes the subgroup counters that AddMemberWithGuid increments.
+    if (g->m_groupType & GROUPTYPE_RAID)
+        g->_initRaidSubGroupsCounter();
 
     for (int i = 0; i < group->membersSize; i++)
         g->AddMemberWithGuid(ObjectGuid(group->members[i]));
 
     sGroupMgr->AddGroup(g);
+    // Mark the service-assigned id used so a locally generated group can't collide with it.
+    sGroupMgr->RegisterGroupId(g->GetGUID().GetCounter());
 }
 
 void ToCloud9GroupHooks::OnGroupDisbanded(uint32 group)

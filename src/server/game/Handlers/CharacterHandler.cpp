@@ -54,6 +54,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "StringConvert.h"
+#include "TC9Sidecar.h"
 #include "Tokenize.h"
 #include "Transport.h"
 #include "Util.h"
@@ -120,6 +121,7 @@ bool LoginQueryHolder::Initialize()
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAIL);
     stmt->SetData(0, rawGUID);
+
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_MAILS, stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAILITEMS);
@@ -695,20 +697,9 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
     ObjectGuid playerGuid;
     recvData >> playerGuid;
 
-    if (PlayerLoading() || GetPlayer() != nullptr || !playerGuid.IsPlayer())
-    {
-        // limit player interaction with the world
-        if (!sWorld->getBoolConfig(CONFIG_REALM_LOGIN_ENABLED))
-        {
-            WorldPacket data(SMSG_CHARACTER_LOGIN_FAILED, 1);
-            // see LoginFailureReason enum for more reasons
-            data << uint8(LoginFailureReason::NoWorld);
-            SendPacket(&data);
-            return;
-        }
-    }
-
-    if (!sToCloud9Sidecar->ClusterModeEnabled() && (!playerGuid.IsPlayer() || !IsLegitCharacterForAccount(playerGuid)))
+    // The ownership check is delegated to the gateway in cluster mode, but a
+    // non-player GUID is invalid regardless of who authenticated the session.
+    if (!playerGuid.IsPlayer() || (!sToCloud9Sidecar->ClusterModeEnabled() && !IsLegitCharacterForAccount(playerGuid)))
     {
         LOG_ERROR("network", "Account ({}) can't login with that character ({}).", GetAccountId(), playerGuid.ToString());
         KickPlayer("Account can't login with this character");

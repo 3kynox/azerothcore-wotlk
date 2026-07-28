@@ -29,6 +29,8 @@
 #include "WorldSession.h"
 #include "WorldSessionMgr.h"
 
+#include <limits>
+
 #define AVAILABLE_MAPS_ALL_MAPS ""
 
 MonitoringDataCollectorResponse HandleMonitoringRequest();
@@ -61,7 +63,16 @@ void ToCloud9Sidecar::Init(uint16 port, int realmId)
             _assignedMapsByID[i] = false;
 
         for (int i = 0; i < assignedMapsSize; i++)
-            _assignedMapsByID[assignedMaps[i]] = true;
+        {
+            uint32 mapId = assignedMaps[i];
+            if (mapId >= MAX_MAP_ID)
+            {
+                LOG_ERROR("server", "ToCloud9Sidecar::Init: map id {} out of range [0, {}), ignored",
+                    mapId, MAX_MAP_ID);
+                continue;
+            }
+            _assignedMapsByID[mapId] = true;
+        }
 
         if (assignedMapsSize > 0)
             free(assignedMaps);
@@ -138,6 +149,9 @@ void ToCloud9Sidecar::ProcessAsyncTasks()
 
 bool ToCloud9Sidecar::IsMapAssigned(uint32 mapId)
 {
+    if (mapId >= MAX_MAP_ID)
+        return false;
+
     return _assignedMapsByID[mapId];
 }
 
@@ -288,12 +302,15 @@ bool ToCloud9Sidecar::NatsPublish(std::string const& subject, std::string const&
     if (!_clusterModeEnabled)
         return false;
 
+    if (payload.size() > size_t(std::numeric_limits<int>::max()))
+        return false;
+
     return TC9NatsPublish(subject.c_str(), payload.c_str(), int(payload.size())) == 0;
 }
 
-bool ToCloud9Sidecar::NatsSubscribe(std::string const& subject, void (*handler)(const char*, const char*, int))
+bool ToCloud9Sidecar::NatsSubscribe(std::string const& subject, void (*handler)(char const*, char const*, int))
 {
-    if (!_clusterModeEnabled)
+    if (!_clusterModeEnabled || !handler)
         return false;
 
     return TC9NatsSubscribe(subject.c_str(), handler) == 0;
@@ -301,38 +318,55 @@ bool ToCloud9Sidecar::NatsSubscribe(std::string const& subject, void (*handler)(
 
 void ToCloud9Sidecar::OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize)
 {
+    std::vector<uint32_t> newMapIDs;
+    newMapIDs.reserve(addedMapsSize > 0 ? addedMapsSize : 0);
+
     for (int i = 0; i < addedMapsSize; i++)
     {
-        sToCloud9Sidecar->_assignedMapsByID[addedMaps[i]] = true;
+        uint32 mapId = addedMaps[i];
+        if (mapId >= MAX_MAP_ID)
+        {
+            LOG_ERROR("server", "ToCloud9Sidecar::OnMapsReassigned: added map id {} out of range [0, {}), ignored",
+                mapId, MAX_MAP_ID);
+            continue;
+        }
 
-        if (Map *map = sMapMgr->FindBaseNonInstanceMap(addedMaps[i]))
+        sToCloud9Sidecar->_assignedMapsByID[mapId] = true;
+        newMapIDs.push_back(mapId);
+
+        if (Map* map = sMapMgr->FindBaseNonInstanceMap(mapId))
             map->StopPlayersRedirectKickTimer();
     }
 
     for (int i = 0; i < removedMapsSize; i++)
     {
-        sToCloud9Sidecar->_assignedMapsByID[removedMaps[i]] = false;
+        uint32 mapId = removedMaps[i];
+        if (mapId >= MAX_MAP_ID)
+        {
+            LOG_ERROR("server", "ToCloud9Sidecar::OnMapsReassigned: removed map id {} out of range [0, {}), ignored",
+                mapId, MAX_MAP_ID);
+            continue;
+        }
 
-        if (Map *map = sMapMgr->FindBaseNonInstanceMap(removedMaps[i]))
+        sToCloud9Sidecar->_assignedMapsByID[mapId] = false;
+
+        if (Map* map = sMapMgr->FindBaseNonInstanceMap(mapId))
             map->StartPlayersRedirectKickTimer();
     }
 
-    if (addedMapsSize > 0)
+    if (!newMapIDs.empty())
     {
-        std::vector<uint32_t> newMapIDs(addedMaps, addedMaps + addedMapsSize);
-
-        auto instanceSaveStoragePtr = std::make_shared<InstanceSaveMgr::InstanceSaveHashMap>();
-        auto playerBindStoragePtr = std::make_shared<PlayerBindStorage>();
+        auto loadRowsPtr = std::make_shared<InstanceMapLoadRows>();
 
         AsyncTask<bool> task(
-           [instanceSaveStoragePtr, playerBindStoragePtr, newMapIDs]() -> bool {
+           [loadRowsPtr, newMapIDs]() -> bool {
                LOG_INFO("server", "Starting to load data for newly assigned maps...");
 
-               sInstanceSaveMgr->LoadInstanceSavesAndBindsForMapIDs(newMapIDs, *instanceSaveStoragePtr, *playerBindStoragePtr);
+               *loadRowsPtr = sInstanceSaveMgr->LoadInstanceSavesAndBindsForMapIDs(newMapIDs);
                return true;
            },
-           [instanceSaveStoragePtr, playerBindStoragePtr, newMapIDs](bool) {
-               sInstanceSaveMgr->MergeWithNewInstanceSaves(*instanceSaveStoragePtr, *playerBindStoragePtr);
+           [loadRowsPtr, newMapIDs](bool) {
+               sInstanceSaveMgr->MergeWithNewInstanceSaves(*loadRowsPtr);
                TC9ReadyToAcceptPlayersFromMaps((uint32_t*)newMapIDs.data(), newMapIDs.size());
 
                LOG_INFO("server", "Finished loading data for newly assigned maps.");

@@ -35,6 +35,15 @@ GetPlayerItemsByGuidsResponse ToCloud9GrpcHandler::GetPlayerItemsByGuids(uint64 
         return resp;
     }
 
+    if (itemsLen <= 0)
+    {
+        GetPlayerItemsByGuidsResponse resp;
+        resp.errorCode = PlayerItemErrorCodeNoError;
+        resp.items = nullptr;
+        resp.itemsSize = 0;
+        return resp;
+    }
+
     int itemsFound = 0;
     std::unique_ptr<Item* []> foundItems(new Item * [itemsLen]);
     for (int i = 0; i < itemsLen; i++)
@@ -149,6 +158,15 @@ RemoveItemsWithGuidsFromPlayerResponse ToCloud9GrpcHandler::RemoveItemsWithGuids
     {
         RemoveItemsWithGuidsFromPlayerResponse resp;
         resp.errorCode = PlayerItemErrorCodePlayerNotFound;
+        return resp;
+    }
+
+    if (itemsLen <= 0)
+    {
+        RemoveItemsWithGuidsFromPlayerResponse resp;
+        resp.errorCode = PlayerItemErrorCodeNoError;
+        resp.updatedItems = nullptr;
+        resp.updatedItemsSize = 0;
         return resp;
     }
 
@@ -275,7 +293,7 @@ ModifyMoneyForPlayerResponse ToCloud9GrpcHandler::ModifyMoneyForPlayer(uint64 pl
     if (!player->ModifyMoney(value, true))
     {
         ModifyMoneyForPlayerResponse resp;
-        resp.errorCode = PlayerMoneyErrorCodeToMuchMoney;
+        resp.errorCode = PlayerMoneyErrorCodeTooMuchMoney;
         resp.newMoneyValue = player->GetMoney();
         return resp;
     }
@@ -389,9 +407,10 @@ BattlegroundJoinCheckErrorCode ToCloud9GrpcHandler::CanPlayerJoinBattlegroundQue
     if (!player)
         return BattlegroundJoinCheckErrorCodePlayerNotFound;
 
-
     // Lets ignore RBAC checks for now.
     Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_RB);
+    if (!bg)
+        return BattlegroundJoinCheckErrorCodeResponseIsFalse;
 
     // has deserter debuff
     if (!player->CanJoinToBattleground(bg))

@@ -3426,6 +3426,24 @@ DungeonAccessRequirements.OptionalStringID = 0
 ###################################################################################################
 
 ###################################################################################################
+# PLAY TIME LIMIT (CAIS)
+#
+#    CAIS.Enable
+#        Description: Enable the Chinese realm consecutive play time restrictions. After 3
+#                     hours of consecutive play, XP and looted money are halved; after 5
+#                     hours, the character can no longer gain XP, loot, or turn in quests.
+#                     Staying offline for 5 hours resets the accumulated time. The 3h/5h
+#                     thresholds are hardcoded client-side.
+#        Note:        A worldserver restart resets the accumulated time for every account.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+
+CAIS.Enable = 0
+
+#
+###################################################################################################
+
+###################################################################################################
 # DUNGEON AND BATTLEGROUND FINDER
 #
 #    JoinBGAndLFG.Enable
@@ -4896,6 +4914,12 @@ Respawn.ForceCompatibilityMode = 0
 #
 #    Cluster.Enabled
 #        Description: Enables/disables cluster mode.
+#                     SECURITY: in cluster mode the ToCloud9 gateway is the trusted
+#                     authentication boundary. This worldserver then skips session-key
+#                     digest verification, packet encryption, warden, IP/country locks,
+#                     ban and minimum-security-level enforcement, and the
+#                     character-ownership check on login. The worldserver port must
+#                     only be reachable by the gateway, never directly by players.
 #        Default: 0 - (Disabled)
 #                 1 - (Enabled)
 

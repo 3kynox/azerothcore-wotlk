@@ -26,6 +26,7 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "StringConvert.h"
+#include "TC9Sidecar.h"
 #include "Tokenize.h"
 #include "WorldPacket.h"
 
@@ -1097,10 +1098,7 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, bool clo
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
     if (!pProto)
-    {
         ABORT();
-        return nullptr;
-    }
 
     if (count > pProto->GetMaxStackSize())
         count = pProto->GetMaxStackSize();

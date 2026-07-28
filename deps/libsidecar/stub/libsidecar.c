@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 void panicWithTC9Unavailable(const char* message) {
-    fprintf(stderr, "Tried to call '%s', but using stub for libsidecar. If your platform supported, use -DUSE_REAL_LIBSIDECAR=ON in cmake to use the real one.\n", message);
+    fprintf(stderr, "Tried to call '%s', but using stub for libsidecar. Use -DUSE_REAL_LIBSIDECAR=ON in cmake to use the real one.\n", message);
     exit(EXIT_FAILURE);
 }
 
@@ -67,18 +67,18 @@ void TC9ProcessEventsHooks() { panicWithTC9Unavailable("TC9ProcessEventsHooks");
 void TC9ProcessGRPCOrHTTPRequests() { panicWithTC9Unavailable("TC9ProcessGRPCOrHTTPRequests"); }
 
 // TC9GetNextAvailableCharacterGuid returns next available characters GUID. Thread unsafe.
-GoUint64 TC9GetNextAvailableCharacterGuid(GoInt realmID) { panicWithTC9Unavailable("TC9GetNextAvailableCharacterGuid"); return 0; }
+uint64_t TC9GetNextAvailableCharacterGuid(int realmID) { panicWithTC9Unavailable("TC9GetNextAvailableCharacterGuid"); return 0; }
 
 // TC9GetNextAvailableItemGuid returns next available item GUID. Thread unsafe.
-GoUint64 TC9GetNextAvailableItemGuid(GoInt realmID) { panicWithTC9Unavailable("TC9GetNextAvailableItemGuid"); return 0; }
+uint64_t TC9GetNextAvailableItemGuid(int realmID) { panicWithTC9Unavailable("TC9GetNextAvailableItemGuid"); return 0; }
 
 // TC9GetNextAvailableInstanceGuid returns next available dungeon/raid instance GUID. Thread unsafe.
-GoUint64 TC9GetNextAvailableInstanceGuid(GoInt realmID) { panicWithTC9Unavailable("TC9GetNextAvailableInstanceGuid"); return 0; }
+uint64_t TC9GetNextAvailableInstanceGuid(int realmID) { panicWithTC9Unavailable("TC9GetNextAvailableInstanceGuid"); return 0; }
 
 // TC9InitLib inits lib by starting services like grpc and healthcheck.
 // Adds game server to the servers registry that will make this server visible for game load balancer.
 //
-void TC9InitLib(GoUint16 port, GoUint32 realmID, GoUint8 isCrossRealm, char* availableMaps, uint32_t** assignedMaps, int* assignedMapsSize) { panicWithTC9Unavailable("TC9InitLib"); }
+void TC9InitLib(uint16_t port, uint32_t realmID, uint8_t isCrossRealm, char* availableMaps, uint32_t** assignedMaps, int* assignedMapsSize) { panicWithTC9Unavailable("TC9InitLib"); }
 
 // TC9GracefulShutdown gracefully stops all running services.
 //
@@ -87,7 +87,7 @@ void TC9GracefulShutdown() { panicWithTC9Unavailable("TC9GracefulShutdown"); }
 // TC9ReadyToAcceptPlayersFromMaps notifies servers registry that this server
 // loaded maps related data and ready to accept players from those maps.
 //
-void TC9ReadyToAcceptPlayersFromMaps(uint32_t* maps, int mapsLen) { panicWithTC9Unavailable("TC9GracefulShutdown"); }
+void TC9ReadyToAcceptPlayersFromMaps(uint32_t* maps, int mapsLen) { panicWithTC9Unavailable("TC9ReadyToAcceptPlayersFromMaps"); }
 
 // TC9SetCanPlayerInteractWithNPCAndFlagsHandler sets handler for can player interact with NPC and with given NPC flags request.
 //
@@ -121,7 +121,11 @@ void TC9SetOnMapsReassignedHook(OnMapsReassignedHook h) { panicWithTC9Unavailabl
 
 // TC9SetMonitoringDataCollectorHandler sets handler for getting data to handle monitoring request.
 //
-void TC9SetMonitoringDataCollectorHandler(MonitoringDataCollectorHandler h) { panicWithTC9Unavailable("TC9SetOnMapsReassignedHook"); }
+void TC9SetMonitoringDataCollectorHandler(MonitoringDataCollectorHandler h) { panicWithTC9Unavailable("TC9SetMonitoringDataCollectorHandler"); }
+
+// TC9NatsPublish/Subscribe generic NATS pub/sub for in-process extensions
+int TC9NatsPublish(const char* subject, const char* payload, int payloadLen) { panicWithTC9Unavailable("TC9NatsPublish"); return -1; }
+int TC9NatsSubscribe(const char* subject, TC9NatsMessageHandler handler) { panicWithTC9Unavailable("TC9NatsSubscribe"); return -1; }
 
 // TC9CharacterLoggedIn/Out publish online status for in-process sessions (bots)
 void TC9CharacterLoggedIn(uint64_t charGUID, const char* charName, uint8_t charRace, uint8_t charClass, uint8_t charGender, uint8_t charLevel, uint32_t charZone, uint32_t charMap, float charPosX, float charPosY, float charPosZ, uint32_t charGuildID, uint32_t accountID) { panicWithTC9Unavailable("TC9CharacterLoggedIn"); }

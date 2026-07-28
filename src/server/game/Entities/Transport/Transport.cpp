@@ -16,7 +16,6 @@
  */
 
 #include "Transport.h"
-#include <chrono>
 #include "Cell.h"
 #include "CellImpl.h"
 #include "Common.h"
@@ -32,26 +31,28 @@
 #include "Spell.h"
 #include "Vehicle.h"
 #include "WorldModel.h"
+#include <chrono>
 
 namespace
 {
-    // Any date would work. Lets use this one - August 10, 2023, 00:00:00.
-    std::time_t startTimestamp = 1689139200;
-    std::chrono::system_clock::time_point tarnsportStartDate = std::chrono::system_clock::from_time_t(startTimestamp);
+    // Any fixed reference epoch works; this one is 2023-07-12 05:20:00 UTC.
+    std::time_t const startTimestamp = 1689139200;
+    std::chrono::system_clock::time_point const transportStartDate = std::chrono::system_clock::from_time_t(startTimestamp);
 
     // Calculates time of the next departure cycle.
-    std::chrono::system_clock::time_point calculateNextDepartureTime(int oneIterationInterval) {
+    std::chrono::system_clock::time_point calculateNextDepartureTime(int oneIterationInterval)
+    {
         std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
         std::chrono::milliseconds interval(oneIterationInterval);
-        std::chrono::milliseconds timeSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - tarnsportStartDate);
+        std::chrono::milliseconds timeSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - transportStartDate);
         int64 intervalsPassed = timeSinceStart.count() / oneIterationInterval;
-        std::chrono::system_clock::time_point nextDeparture = tarnsportStartDate + (interval * (intervalsPassed + 1));
+        std::chrono::system_clock::time_point nextDeparture = transportStartDate + (interval * (intervalsPassed + 1));
         return nextDeparture;
     }
 }
 
 MotionTransport::MotionTransport() : Transport(), _transportInfo(nullptr), _isMoving(true), _pendingStop(false), _triggeredArrivalEvent(false), _triggeredDepartureEvent(false), _passengersLoaded(false), _delayedTeleport(false),
-    _requiresFirstDepartureSync(false), _firstDepartureTime(tarnsportStartDate)
+    _requiresFirstDepartureSync(false), _firstDepartureTime(transportStartDate)
 {
     m_updateFlag = UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION;
 }
@@ -142,7 +143,7 @@ uint32 MotionTransport::HandleFirstDepartureSync(uint32 diff)
     if (!_requiresFirstDepartureSync)
         return diff;
 
-    if (_firstDepartureTime == tarnsportStartDate)
+    if (_firstDepartureTime == transportStartDate)
     {
         _firstDepartureTime = calculateNextDepartureTime(_transportInfo->pathTime);
         return diff;
@@ -167,12 +168,17 @@ uint32 MotionTransport::HandleFirstDepartureSync(uint32 diff)
         {
             if (Player* player = i->GetSource())
             {
+                // Same phase filter as Map::SendInitTransports: players outside
+                // the transport's phase must not get a create-block for it.
+                if (!player->InSamePhase(this))
+                    continue;
+
                 UpdateData transData;
                 this->BuildCreateUpdateBlockForPlayer(&transData, player);
 
                 WorldPacket packet;
                 transData.BuildPacket(packet);
-                player->GetSession()->SendPacket(&packet);
+                player->SendDirectMessage(&packet);
             }
         }
     }
