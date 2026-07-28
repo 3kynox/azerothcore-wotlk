@@ -710,6 +710,8 @@ public:
     void HandleSetMOTD(WorldSession* session, std::string_view motd);
     void HandleSetInfo(WorldSession* session, std::string_view info);
     void HandleSetEmblem(WorldSession* session, EmblemInfo const& emblemInfo);
+    // Appelee par mod-playerbots (GuildCreateActions) : pas de session bot.
+    void HandleSetEmblem(EmblemInfo const& emblemInfo);
     void HandleSetLeader(WorldSession* session, std::string_view name);
     void HandleSetBankTabInfo(WorldSession* session, uint8 tabId, std::string_view name, std::string_view icon);
     void HandleSetMemberNote(WorldSession* session, std::string_view name, std::string_view note, bool isPublic);

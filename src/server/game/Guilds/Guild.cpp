@@ -1501,6 +1501,12 @@ void Guild::HandleSetEmblem(WorldSession* session, EmblemInfo const& emblemInfo)
     }
 }
 
+void Guild::HandleSetEmblem(EmblemInfo const& emblemInfo)
+{
+    m_emblemInfo = emblemInfo;
+    m_emblemInfo.SaveToDB(m_id);
+}
+
 
 void Guild::HandleSetLeader(WorldSession* session, std::string_view name)
 {
