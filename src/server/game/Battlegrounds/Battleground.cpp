@@ -35,6 +35,7 @@
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "Player.h"
+#include "Realm.h"
 #include "RBAC.h"
 #include "Realm.h"
 #include "ReputationMgr.h"

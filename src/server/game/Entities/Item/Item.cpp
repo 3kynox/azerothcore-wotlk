@@ -1109,8 +1109,10 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, bool clo
     if (sToCloud9Sidecar->IsCrossrealm() && player)
         realmId = player->GetGUID().GetRealmID();
 
-    Item* pItem = NewItemOrBag(pProto);
+    // playerbots: temporary items get a sentinel guid instead of consuming one from the generator
     uint32 guid = temp ? 0xFFFFFFFF : sObjectMgr->GetGenerator<HighGuid::Item>().Generate(realmId);
+
+    Item* pItem = NewItemOrBag(pProto);
     if (!pItem->Create(guid, item, player))
     {
         delete pItem;

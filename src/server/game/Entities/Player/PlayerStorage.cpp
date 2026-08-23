@@ -6635,7 +6635,16 @@ void Player::_LoadSpells(PreparedQueryResult result)
             if (CheckSkillLearnedBySpell(spellId))
                 addSpell(spellId, specMask, true);
             else
+            {
+                // Spell was never addSpell()'d, so removeSpell is often a no-op and would
+                // leave an orphan character_spell row (MySQL 1062 on later re-learn/save).
                 removeSpell(spellId, SPEC_MASK_ALL, false);
+
+                CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL_BY_SPELL);
+                stmt->SetData(0, GetGUID().GetRawValue());
+                stmt->SetData(1, spellId);
+                CharacterDatabase.Execute(stmt);
+            }
         } while (result->NextRow());
     }
 }
@@ -7277,6 +7286,18 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logo
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+}
+
+// flag data to be saved by UpdateAdditionalSaves a moment after an important change,
+// filtered by the PlayerSave.AdditionalSaves config mask
+void Player::AdditionalSavingAddMask(uint8 mask)
+{
+    mask &= sWorld->getIntConfig(CONFIG_ADDITIONAL_SAVES);
+    if (!mask)
+        return;
+
+    m_additionalSaveTimer = 2000;
+    m_additionalSaveMask |= mask;
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state
