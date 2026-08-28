@@ -92,6 +92,7 @@ public:
     // pvpTeamId: 1 alliance, 2 horde).
     bool EnqueueLocalPlayerToBattleground(uint64 playerGuid, uint32 playerLvl,
         uint32 bgTypeId, uint32 pvpTeamId);
+    bool RemovePlayerFromBattlegroundQueue(uint64 playerGuid, uint32 bgTypeId);
 
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);
