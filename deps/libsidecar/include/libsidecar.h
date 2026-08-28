@@ -124,6 +124,11 @@ TC9_API int TC9GuildAcceptInvite(uint64_t guid, const char* name, uint32_t lvl,
 TC9_API int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgTypeID,
     uint32_t* outInstanceID, uint32_t* outMapID, int* outIsAssignedToThisServer);
 TC9_API int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID);
+
+/* Remove a player from a battleground queue (leftover in-process enqueues
+ * that were never invited, or out-of-bracket after a level up). Blocking
+ * gRPC call, do not call from map update threads. 0 on success. */
+TC9_API int TC9RemovePlayerFromBattlegroundQueue(uint64_t playerGUID, uint32_t bgTypeID);
 TC9_API int TC9EnqueueLocalPlayerToBattleground(uint64_t playerGUID, uint32_t playerLvl,
     uint32_t bgTypeID, uint32_t pvpTeamID);
 TC9_API void TC9SetOnGuildCreatedHook(OnGuildCreatedHook h);

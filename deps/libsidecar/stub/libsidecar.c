@@ -161,6 +161,9 @@ int TC9BattlegroundQueueDataForLocalPlayer(uint64_t playerGUID, uint32_t* outBgT
 //
 int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID) { panicWithTC9Unavailable("TC9PlayerJoinedBattleground"); return -1; }
 
+// TC9RemovePlayerFromBattlegroundQueue drops a leftover or out-of-bracket battleground queue entry
+int TC9RemovePlayerFromBattlegroundQueue(uint64_t playerGUID, uint32_t bgTypeID) { panicWithTC9Unavailable("TC9RemovePlayerFromBattlegroundQueue"); return -1; }
+
 // TC9EnqueueLocalPlayerToBattleground enqueues a solo in-process player into a battleground queue
 //
 int TC9EnqueueLocalPlayerToBattleground(uint64_t playerGUID, uint32_t playerLvl,
