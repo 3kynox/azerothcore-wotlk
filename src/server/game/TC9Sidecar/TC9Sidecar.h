@@ -93,6 +93,8 @@ public:
     bool EnqueueLocalPlayerToBattleground(uint64 playerGuid, uint32 playerLvl,
         uint32 bgTypeId, uint32 pvpTeamId);
     bool RemovePlayerFromBattlegroundQueue(uint64 playerGuid, uint32 bgTypeId);
+    bool EnqueueLocalGroupToBattleground(uint64 leaderGuid, uint32 leaderLvl,
+        uint32 bgTypeId, uint32 pvpTeamId, std::vector<uint64> const& members);
 
 private:
     static void OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize);

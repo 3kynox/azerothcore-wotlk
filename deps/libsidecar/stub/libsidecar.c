@@ -164,6 +164,9 @@ int TC9PlayerJoinedBattleground(uint64_t playerGUID, uint32_t instanceID) { pani
 // TC9RemovePlayerFromBattlegroundQueue drops a leftover or out-of-bracket battleground queue entry
 int TC9RemovePlayerFromBattlegroundQueue(uint64_t playerGUID, uint32_t bgTypeID) { panicWithTC9Unavailable("TC9RemovePlayerFromBattlegroundQueue"); return -1; }
 
+// TC9EnqueueLocalGroupToBattleground enqueues a leader plus party members as one queue group
+int TC9EnqueueLocalGroupToBattleground(uint64_t leaderGUID, uint32_t leaderLvl, uint32_t bgTypeID, uint32_t pvpTeamID, const uint64_t* memberGUIDs, int memberCount) { panicWithTC9Unavailable("TC9EnqueueLocalGroupToBattleground"); return -1; }
+
 // TC9EnqueueLocalPlayerToBattleground enqueues a solo in-process player into a battleground queue
 //
 int TC9EnqueueLocalPlayerToBattleground(uint64_t playerGUID, uint32_t playerLvl,

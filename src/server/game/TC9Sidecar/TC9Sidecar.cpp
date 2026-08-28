@@ -299,6 +299,16 @@ bool ToCloud9Sidecar::EnqueueLocalPlayerToBattleground(uint64 playerGuid, uint32
     return TC9EnqueueLocalPlayerToBattleground(playerGuid, playerLvl, bgTypeId, pvpTeamId) == 0;
 }
 
+bool ToCloud9Sidecar::EnqueueLocalGroupToBattleground(uint64 leaderGuid, uint32 leaderLvl,
+    uint32 bgTypeId, uint32 pvpTeamId, std::vector<uint64> const& members)
+{
+    if (!_clusterModeEnabled)
+        return false;
+
+    return TC9EnqueueLocalGroupToBattleground(leaderGuid, leaderLvl, bgTypeId, pvpTeamId,
+        members.empty() ? nullptr : members.data(), int(members.size())) == 0;
+}
+
 bool ToCloud9Sidecar::RemovePlayerFromBattlegroundQueue(uint64 playerGuid, uint32 bgTypeId)
 {
     if (!_clusterModeEnabled)
