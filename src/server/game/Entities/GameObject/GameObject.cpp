@@ -18,6 +18,7 @@
 #include "AccountMgr.h"
 #include "BattlegroundAV.h"
 #include "CellImpl.h"
+#include "CharacterCache.h"
 #include "CreatureAISelector.h"
 #include "DisableMgr.h"
 #include "GameObjectAI.h"
@@ -31,6 +32,7 @@
 #include "PoolMgr.h"
 #include "ScriptMgr.h"
 #include "SpellMgr.h"
+#include "TC9PlayerOps.h"
 #include "Transport.h"
 #include "UpdateFieldFlags.h"
 #include "World.h"
@@ -579,7 +581,10 @@ void GameObject::Update(uint32 diff)
                                 SetLootState(GO_READY);
 
                             ClearRitualList();
-                            spellCaster->CastSpell(spellCaster, spellId, true);
+                            // Cluster: a cross-server summon target cannot be
+                            // resolved by the final spell — relay it instead.
+                            if (!TC9PlayerOps::RelayRitualSummonIfRemote(spellCaster, this, spellId))
+                                spellCaster->CastSpell(spellCaster, spellId, true);
                             return;
                         }
                     case GAMEOBJECT_TYPE_CHEST:
@@ -1908,18 +1913,34 @@ void GameObject::Use(Unit* user)
 
                 Player* player = user->ToPlayer();
 
-                Player* targetPlayer = ObjectAccessor::FindPlayer(player->GetTarget());
+                ObjectGuid targetGuid = player->GetTarget();
+                Player* targetPlayer = ObjectAccessor::FindPlayer(targetGuid);
 
-                // accept only use by player from same raid as caster
-                if (!targetPlayer || !targetPlayer->IsInSameRaidWith(player))
-                    return;
+                if (targetPlayer)
+                {
+                    // accept only use by player from same raid as caster
+                    if (!targetPlayer->IsInSameRaidWith(player))
+                        return;
+
+                    if (targetPlayer->GetLevel() < info->meetingstone.minLevel)
+                        return;
+                }
+                else
+                {
+                    // Cluster: the selected group member can be live on
+                    // another worldserver — validate through the group mirror
+                    // and the character cache instead (BUG-TC9-067). The
+                    // summon itself is relayed at ritual completion.
+                    CharacterCacheEntry const* entry =
+                        player->GetGroup() && player->GetGroup()->IsMember(targetGuid) &&
+                        TC9PlayerOps::IsLiveElsewhere(targetGuid)
+                            ? sCharacterCache->GetCharacterCacheByGuid(targetGuid) : nullptr;
+                    if (!entry || entry->Level < info->meetingstone.minLevel)
+                        return;
+                }
 
                 //required lvl checks!
-                uint8 level = player->GetLevel();
-                if (level < info->meetingstone.minLevel)
-                    return;
-                level = targetPlayer->GetLevel();
-                if (level < info->meetingstone.minLevel)
+                if (player->GetLevel() < info->meetingstone.minLevel)
                     return;
 
                 spellId = 23598;                            // Meeting Stone Summon

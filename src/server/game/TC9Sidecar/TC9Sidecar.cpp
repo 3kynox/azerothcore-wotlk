@@ -25,6 +25,7 @@
 #include "TC9GroupHooks.h"
 #include "TC9GrpcHandler.h"
 #include "TC9GuildHooks.h"
+#include "TC9PlayerOps.h"
 #include "UpdateTime.h"
 #include "WorldSession.h"
 #include "WorldSessionMgr.h"
@@ -134,6 +135,7 @@ void ToCloud9Sidecar::SetupGrpcHandlers()
 
 void ToCloud9Sidecar::ProcessHooks()
 {
+    TC9PlayerOps::EnsureSubscribed();
     TC9ProcessEventsHooks();
 }
 

@@ -46,6 +46,7 @@
 #include "Realm.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
+#include "TC9PlayerOps.h"
 #include "TargetedMovementGenerator.h"
 #include "Tokenize.h"
 #include "Transport.h"
@@ -1034,6 +1035,24 @@ public:
                 return false;
             }
 
+            // Cluster: "offline" can mean live on another worldserver
+            // (BUG-TC9-067) — relay instead of writing a position the live
+            // session overwrites on its next save.
+            if (TC9PlayerOps::IsLiveElsewhere(target->GetGUID()))
+            {
+                Player* gm = handler->GetSession()->GetPlayer();
+                if (gm->GetMap()->Instanceable())
+                {
+                    handler->SendErrorMessage("Cross-server summon into an instance is not supported.");
+                    return false;
+                }
+
+                handler->PSendSysMessage("Summoning {} (other server).", nameLink);
+                TC9PlayerOps::RelayTeleport(target->GetGUID(), gm->GetMapId(), gm->GetPositionX(),
+                    gm->GetPositionY(), gm->GetPositionZ(), gm->GetOrientation(), gm);
+                return true;
+            }
+
             handler->PSendSysMessage(LANG_SUMMONING, nameLink, handler->GetAcoreString(LANG_OFFLINE));
 
             // in point where GM stay
@@ -1150,6 +1169,25 @@ public:
             float x, y, z;
             handler->GetSession()->GetPlayer()->GetClosePoint(x, y, z, player->GetObjectSize());
             player->TeleportTo(handler->GetSession()->GetPlayer()->GetMapId(), x, y, z, player->GetOrientation(), 0, handler->GetSession()->GetPlayer());
+        }
+
+        // Cluster: members live on another worldserver have no local Player
+        // and are absent from the GroupReference list above (BUG-TC9-067).
+        if (!toInstance)
+        {
+            Player* gm = handler->GetSession()->GetPlayer();
+            for (Group::MemberSlot const& slot : group->GetMemberSlots())
+            {
+                if (slot.guid == gm->GetGUID() || ObjectAccessor::FindPlayer(slot.guid))
+                    continue;
+
+                if (!TC9PlayerOps::IsLiveElsewhere(slot.guid))
+                    continue;
+
+                handler->PSendSysMessage("Summoning {} (other server).", slot.name);
+                TC9PlayerOps::RelayTeleport(slot.guid, gm->GetMapId(), gm->GetPositionX(),
+                    gm->GetPositionY(), gm->GetPositionZ(), gm->GetOrientation(), gm);
+            }
         }
 
         return true;

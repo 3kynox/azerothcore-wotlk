@@ -24,6 +24,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "RBAC.h"
+#include "TC9PlayerOps.h"
 
 using namespace Acore::ChatCommands;
 
@@ -150,6 +151,25 @@ public:
                 return false;
 
             std::string nameLink = handler->playerLink(player.GetName());
+
+            // Cluster: "offline" can mean live on another worldserver
+            // (BUG-TC9-067) — relay instead of writing a position the live
+            // session overwrites on its next save.
+            if (TC9PlayerOps::IsLiveElsewhere(player.GetGUID()))
+            {
+                MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
+                if (mapEntry && mapEntry->Instanceable())
+                {
+                    handler->SendErrorMessage("Cross-server teleport into an instance is not supported.");
+                    return false;
+                }
+
+                handler->PSendSysMessage("Teleporting {} (other server) to {}.", nameLink, locationName);
+                TC9PlayerOps::RelayTeleport(player.GetGUID(), mapId, pos.GetPositionX(),
+                    pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(),
+                    handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr);
+                return true;
+            }
 
             handler->PSendSysMessage(LANG_TELEPORTING_TO, nameLink, handler->GetAcoreString(LANG_OFFLINE), locationName);
 
