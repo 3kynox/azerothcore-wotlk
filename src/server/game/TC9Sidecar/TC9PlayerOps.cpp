@@ -136,11 +136,17 @@ namespace TC9PlayerOps
 
     void RelayTeleport(ObjectGuid target, uint32 mapId, float x, float y, float z, float o, Player* requester)
     {
+        if (!sToCloud9Sidecar->ClusterModeEnabled())
+            return;
+
         Publish(OP_TELEPORT, target, mapId, x, y, z, o, 0, requester);
     }
 
     void RelaySummonRequest(ObjectGuid target, uint32 mapId, float x, float y, float z, uint32 zoneId, Player* requester)
     {
+        if (!sToCloud9Sidecar->ClusterModeEnabled())
+            return;
+
         Publish(OP_SUMMON_REQUEST, target, mapId, x, y, z, 0.f, zoneId, requester);
     }
 

@@ -1036,21 +1036,17 @@ public:
             }
 
             // Cluster: "offline" can mean live on another worldserver
-            // (BUG-TC9-067) — relay instead of writing a position the live
-            // session overwrites on its next save.
-            if (TC9PlayerOps::IsLiveElsewhere(target->GetGUID()))
+            // (BUG-TC9-067), and the characters.online gate proved unreliable
+            // (a logout/login race leaves the flag at 0 for a whole session —
+            // seen live 29/08). Relay unconditionally: the shard holding the
+            // live session acts, nobody acts for a truly offline target, and
+            // the vanilla offline write below stays as the fallback (a live
+            // session's next save simply overwrites it with the same spot).
             {
                 Player* gm = handler->GetSession()->GetPlayer();
-                if (gm->GetMap()->Instanceable())
-                {
-                    handler->SendErrorMessage("Cross-server summon into an instance is not supported.");
-                    return false;
-                }
-
-                handler->PSendSysMessage("Summoning {} (other server).", nameLink);
-                TC9PlayerOps::RelayTeleport(target->GetGUID(), gm->GetMapId(), gm->GetPositionX(),
-                    gm->GetPositionY(), gm->GetPositionZ(), gm->GetOrientation(), gm);
-                return true;
+                if (!gm->GetMap()->Instanceable())
+                    TC9PlayerOps::RelayTeleport(target->GetGUID(), gm->GetMapId(), gm->GetPositionX(),
+                        gm->GetPositionY(), gm->GetPositionZ(), gm->GetOrientation(), gm);
             }
 
             handler->PSendSysMessage(LANG_SUMMONING, nameLink, handler->GetAcoreString(LANG_OFFLINE));
@@ -1181,10 +1177,10 @@ public:
                 if (slot.guid == gm->GetGUID() || ObjectAccessor::FindPlayer(slot.guid))
                     continue;
 
-                if (!TC9PlayerOps::IsLiveElsewhere(slot.guid))
-                    continue;
-
-                handler->PSendSysMessage("Summoning {} (other server).", slot.name);
+                // No characters.online gate here — the flag is unreliable
+                // (stale after a logout/login race). The relay is a no-op for
+                // members who are truly offline.
+                handler->PSendSysMessage("Summoning {} (other server, if online).", slot.name);
                 TC9PlayerOps::RelayTeleport(slot.guid, gm->GetMapId(), gm->GetPositionX(),
                     gm->GetPositionY(), gm->GetPositionZ(), gm->GetOrientation(), gm);
             }
