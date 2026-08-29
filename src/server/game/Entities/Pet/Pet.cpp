@@ -544,8 +544,14 @@ void Pet::SavePetToDB(PetSaveMode mode)
         trans = CharacterDatabase.BeginTransaction();
         // remove current data
 
-        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_ID);
+        // Cluster: pet numbers are per-worldserver counters seeded from the
+        // same MAX(id), so two shards can hand out the same id — an unscoped
+        // DELETE then destroys another owner's pet (BUG-TC9-065: Domi 08/08,
+        // Démios 28/08). Scope it to this owner; the real fix (clustered pet
+        // numbers) is tracked separately.
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_ID_AND_OWNER);
         stmt->SetData(0, m_charmInfo->GetPetNumber());
+        stmt->SetData(1, ownerLowGUID);
         trans->Append(stmt);
 
         // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
