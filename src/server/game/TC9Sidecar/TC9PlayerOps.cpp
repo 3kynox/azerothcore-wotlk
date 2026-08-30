@@ -219,10 +219,14 @@ namespace TC9PlayerOps
 
         // The strong vanilla precondition that IS checkable from here: the GM
         // leads a group the target belongs to (groups are mirrored across
-        // worldservers). The rest re-runs locally at hop 2.
-        Group* group = gm->GetGroup();
-        if (!group || group->GetLeaderGUID() != gm->GetGUID() || !group->IsMember(target))
-            return false;
+        // worldservers). Instance.GMSummonPlayer waives it, as it does for
+        // the local branch. The rest re-runs locally at hop 2.
+        if (!sWorld->getBoolConfig(CONFIG_INSTANCE_GMSUMMON_PLAYER))
+        {
+            Group* group = gm->GetGroup();
+            if (!group || group->GetLeaderGUID() != gm->GetGUID() || !group->IsMember(target))
+                return false;
+        }
 
         AreaTriggerTeleport const* entrance = sObjectMgr->GetGoBackTrigger(map->GetId());
         if (!entrance)
@@ -301,8 +305,9 @@ namespace TC9PlayerOps
                 continue;
             }
 
-            if (!gm->GetGroup() || target->GetGroup() != gm->GetGroup() ||
-                gm->GetGroup()->GetLeaderGUID() != gm->GetGUID())
+            if (!sWorld->getBoolConfig(CONFIG_INSTANCE_GMSUMMON_PLAYER) &&
+                (!gm->GetGroup() || target->GetGroup() != gm->GetGroup() ||
+                 gm->GetGroup()->GetLeaderGUID() != gm->GetGUID()))
                 continue;
 
             Map* destMap = target->GetMap();

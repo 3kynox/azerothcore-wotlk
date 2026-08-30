@@ -994,9 +994,11 @@ public:
                 }
 
                 // we are in an instance, and can only summon players in our group with us as leader
-                if (!handler->GetSession()->GetPlayer()->GetGroup() || !targetPlayer->GetGroup() ||
+                // — unless Instance.GMSummonPlayer already trusts the GM to summon anyone here.
+                if (!sWorld->getBoolConfig(CONFIG_INSTANCE_GMSUMMON_PLAYER) &&
+                    (!handler->GetSession()->GetPlayer()->GetGroup() || !targetPlayer->GetGroup() ||
                         (targetPlayer->GetGroup()->GetLeaderGUID() != handler->GetSession()->GetPlayer()->GetGUID()) ||
-                        (handler->GetSession()->GetPlayer()->GetGroup()->GetLeaderGUID() != handler->GetSession()->GetPlayer()->GetGUID()))
+                        (handler->GetSession()->GetPlayer()->GetGroup()->GetLeaderGUID() != handler->GetSession()->GetPlayer()->GetGUID())))
                     // the last check is a bit excessive, but let it be, just in case
                 {
                     handler->SendErrorMessage(LANG_CANNOT_SUMMON_TO_INST, nameLink);
