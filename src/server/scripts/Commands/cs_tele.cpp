@@ -25,6 +25,7 @@
 #include "Player.h"
 #include "RBAC.h"
 #include "TC9PlayerOps.h"
+#include "TC9Sidecar.h"
 
 using namespace Acore::ChatCommands;
 
@@ -156,19 +157,23 @@ public:
             // (BUG-TC9-067), and the characters.online gate proved unreliable
             // (stale flag after a logout/login race, seen live 29/08). Relay
             // unconditionally — the shard holding the live session acts, and
-            // the vanilla offline write below stays as the fallback.
-            // The flag stays good enough for the chat feedback wording.
-            bool liveElsewhere = TC9PlayerOps::IsLiveElsewhere(player.GetGUID());
+            // the vanilla offline write below stays as the fallback. The
+            // feedback can't trust that flag either (it kept reading
+            // "(offline)" on live targets): word it like .groupsummon does.
+            bool relayed = false;
             {
                 MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
                 if (!mapEntry || !mapEntry->Instanceable())
+                {
                     TC9PlayerOps::RelayTeleport(player.GetGUID(), mapId, pos.GetPositionX(),
                         pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(),
                         handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr);
+                    relayed = sToCloud9Sidecar->ClusterModeEnabled();
+                }
             }
 
             handler->PSendSysMessage(LANG_TELEPORTING_TO, nameLink,
-                liveElsewhere ? " (other server)" : handler->GetAcoreString(LANG_OFFLINE), locationName);
+                relayed ? " (other server, if online)" : handler->GetAcoreString(LANG_OFFLINE), locationName);
 
             Player::SavePositionInDB({ mapId, pos }, sMapMgr->GetZoneId(PHASEMASK_NORMAL, { mapId, pos }), player.GetGUID(), nullptr);
         }

@@ -17,10 +17,12 @@
 
 #include "TC9Sidecar.h"
 #include "Config.h"
+#include "GameTime.h"
 #include "InstanceSaveMgr.h"
 #include "libsidecar.h"
 #include "Log.h"
 #include "MapMgr.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "TC9GroupHooks.h"
 #include "TC9GrpcHandler.h"
@@ -31,8 +33,44 @@
 #include "WorldSessionMgr.h"
 
 #include <limits>
+#include <shared_mutex>
 
 #define AVAILABLE_MAPS_ALL_MAPS ""
+
+namespace
+{
+    // In-process bots have no gateway watching their traffic, so the party
+    // stats mirror never hears about their vitals: group members viewed from
+    // another worldserver render as a skull (level 0) over an empty bar.
+    // Feed the same chars-updates pipeline the gateways use — grouped bots
+    // only, the rest has nobody to display it.
+    constexpr uint32 BOT_VITALS_PUBLISH_INTERVAL_MS = 10 * 1000;
+
+    void PublishGroupedBotVitals()
+    {
+        static uint32 lastPublishMS = 0;
+        uint32 now = GameTime::GetGameTimeMS().count();
+        if (lastPublishMS && (now - lastPublishMS) < BOT_VITALS_PUBLISH_INTERVAL_MS)
+            return;
+        lastPublishMS = now;
+
+        std::shared_lock<std::shared_mutex> lock(*HashMapHolder<Player>::GetLock());
+        for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
+        {
+            if (!player || !player->IsInWorld() || !player->GetSession() ||
+                !player->GetSession()->IsBot() || !player->GetGroup())
+                continue;
+
+            Powers powerType = player->getPowerType();
+            TC9CharacterVitalsUpdated(player->GetGUID().GetRawValue(), player->GetLevel(),
+                player->GetHealth(), player->GetMaxHealth(), uint8(powerType),
+                player->GetPower(powerType), player->GetMaxPower(powerType),
+                player->GetPositionX(), player->GetPositionY(),
+                player->IsAlive() ? 0 : 1,
+                player->HasPlayerFlag(PLAYER_FLAGS_GHOST) ? 1 : 0);
+        }
+    }
+}
 
 MonitoringDataCollectorResponse HandleMonitoringRequest();
 
@@ -137,6 +175,8 @@ void ToCloud9Sidecar::ProcessHooks()
 {
     TC9PlayerOps::EnsureSubscribed();
     TC9PlayerOps::ProcessPending();
+    if (_clusterModeEnabled)
+        PublishGroupedBotVitals();
     TC9ProcessEventsHooks();
 }
 

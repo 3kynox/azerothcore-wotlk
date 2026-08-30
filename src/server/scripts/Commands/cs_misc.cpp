@@ -47,6 +47,7 @@
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "TC9PlayerOps.h"
+#include "TC9Sidecar.h"
 #include "TargetedMovementGenerator.h"
 #include "Tokenize.h"
 #include "Transport.h"
@@ -1044,14 +1045,20 @@ public:
             // live session acts, nobody acts for a truly offline target, and
             // the vanilla offline write below stays as the fallback (a live
             // session's next save simply overwrites it with the same spot).
-            // The flag stays good enough for the chat feedback wording.
-            bool liveElsewhere = TC9PlayerOps::IsLiveElsewhere(target->GetGUID());
+            // The feedback can't trust that flag either (it kept reading
+            // "(offline)" on live targets): word it like .groupsummon does.
+            bool relayed = false;
             {
                 Player* gm = handler->GetSession()->GetPlayer();
                 if (!gm->GetMap()->Instanceable())
+                {
                     TC9PlayerOps::RelayTeleport(target->GetGUID(), gm->GetMapId(), gm->GetPositionX(),
                         gm->GetPositionY(), gm->GetPositionZ(), gm->GetOrientation(), gm);
-                else if (!TC9PlayerOps::RelayInstanceSummon(target->GetGUID(), gm))
+                    relayed = sToCloud9Sidecar->ClusterModeEnabled();
+                }
+                else if (TC9PlayerOps::RelayInstanceSummon(target->GetGUID(), gm))
+                    relayed = true;
+                else
                 {
                     handler->SendErrorMessage(LANG_CANNOT_SUMMON_TO_INST, nameLink);
                     return false;
@@ -1059,7 +1066,7 @@ public:
             }
 
             handler->PSendSysMessage(LANG_SUMMONING, nameLink,
-                liveElsewhere ? " (other server)" : handler->GetAcoreString(LANG_OFFLINE));
+                relayed ? " (other server, if online)" : handler->GetAcoreString(LANG_OFFLINE));
 
             // in point where GM stay
             Player::SavePositionInDB(handler->GetSession()->GetPlayer()->GetMapId(),
