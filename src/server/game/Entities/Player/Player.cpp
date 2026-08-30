@@ -96,6 +96,7 @@
 #include "WorldStateDefines.h"
 #include "WorldStatePackets.h"
 #include <cmath>
+#include <execinfo.h>
 #include <queue>
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
@@ -1405,6 +1406,18 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         LOG_ERROR("entities.player", "TeleportTo: invalid map ({}) or invalid coordinates (X: {}, Y: {}, Z: {}, O: {}) given when teleporting player ({}, name: {}, map: {}, X: {}, Y: {}, Z: {}, O: {}).",
                        mapid, x, y, z, orientation, GetGUID().ToString(), GetName(), GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+
+        // BUG-TC9-069: this exact refusal showed up seconds before both
+        // kalimdor world-thread freezes — capture the caller (path is rare,
+        // the cost stays nil; raw offsets resolve offline against the image).
+        void* frames[24];
+        int depth = backtrace(frames, 24);
+        if (char** symbols = backtrace_symbols(frames, depth))
+        {
+            for (int i = 1; i < depth; ++i)
+                LOG_ERROR("entities.player", "TeleportTo backtrace #{}: {}", i, symbols[i]);
+            free(symbols);
+        }
         return false;
     }
 
