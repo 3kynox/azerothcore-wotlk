@@ -57,6 +57,24 @@ namespace TC9PlayerOps
     // fail on a cross-server target. True = the summon was relayed instead
     // (caller skips the final cast), false = proceed with the vanilla cast.
     bool RelayRitualSummonIfRemote(Unit* spellCaster, GameObject* portal, uint32 spellId);
+
+    // GM summon while inside a dungeon, target live on another worldserver.
+    // A direct relay to instance coordinates would make the remote server
+    // evaluate dungeon-entry rules for a map it does not own, so the move is
+    // done in two hops: relay to the dungeon's world-side entrance (the same
+    // proven path as any cross-server teleport — the gateway redirects the
+    // client here), then finish with a plain local summon when the target
+    // logs in on this server. True = relay sent, false = preconditions not
+    // met (caller reports the vanilla instance-summon error).
+    bool RelayInstanceSummon(ObjectGuid target, Player* gm);
+
+    // CharacterHandler login hook (this server only): if the character has a
+    // pending instance summon, schedule its final local hop.
+    void OnCharacterLoggedIn(Player* player);
+
+    // World thread, every ProcessHooks tick: run the scheduled final hops
+    // once their settle delay elapsed, re-validating everything locally.
+    void ProcessPending();
 }
 
 #endif // _TC9_PLAYER_OPS_H

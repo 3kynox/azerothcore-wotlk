@@ -157,6 +157,8 @@ public:
             // (stale flag after a logout/login race, seen live 29/08). Relay
             // unconditionally — the shard holding the live session acts, and
             // the vanilla offline write below stays as the fallback.
+            // The flag stays good enough for the chat feedback wording.
+            bool liveElsewhere = TC9PlayerOps::IsLiveElsewhere(player.GetGUID());
             {
                 MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
                 if (!mapEntry || !mapEntry->Instanceable())
@@ -165,7 +167,8 @@ public:
                         handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr);
             }
 
-            handler->PSendSysMessage(LANG_TELEPORTING_TO, nameLink, handler->GetAcoreString(LANG_OFFLINE), locationName);
+            handler->PSendSysMessage(LANG_TELEPORTING_TO, nameLink,
+                liveElsewhere ? " (other server)" : handler->GetAcoreString(LANG_OFFLINE), locationName);
 
             Player::SavePositionInDB({ mapId, pos }, sMapMgr->GetZoneId(PHASEMASK_NORMAL, { mapId, pos }), player.GetGUID(), nullptr);
         }

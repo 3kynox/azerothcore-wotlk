@@ -1930,10 +1930,12 @@ void GameObject::Use(Unit* user)
                     // Cluster: the selected group member can be live on
                     // another worldserver — validate through the group mirror
                     // and the character cache instead (BUG-TC9-067). The
-                    // summon itself is relayed at ritual completion.
+                    // summon itself is relayed at ritual completion. No
+                    // IsLiveElsewhere gate here: a stale online flag made the
+                    // stone fail with no feedback at all (seen live 30/08);
+                    // for a truly offline member the ritual just fizzles.
                     CharacterCacheEntry const* entry =
-                        player->GetGroup() && player->GetGroup()->IsMember(targetGuid) &&
-                        TC9PlayerOps::IsLiveElsewhere(targetGuid)
+                        player->GetGroup() && player->GetGroup()->IsMember(targetGuid)
                             ? sCharacterCache->GetCharacterCacheByGuid(targetGuid) : nullptr;
                     if (!entry || entry->Level < info->meetingstone.minLevel)
                         return;

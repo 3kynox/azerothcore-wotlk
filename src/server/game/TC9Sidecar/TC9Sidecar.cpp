@@ -136,6 +136,7 @@ void ToCloud9Sidecar::SetupGrpcHandlers()
 void ToCloud9Sidecar::ProcessHooks()
 {
     TC9PlayerOps::EnsureSubscribed();
+    TC9PlayerOps::ProcessPending();
     TC9ProcessEventsHooks();
 }
 
@@ -184,6 +185,10 @@ void ToCloud9Sidecar::OnBattlegroundStatusChanged(uint32 instanceID, uint8 statu
 
 void ToCloud9Sidecar::OnInProcessCharacterLoggedIn(Player* player)
 {
+    // Real players and bots alike: finish a pending two-hop instance summon.
+    if (_clusterModeEnabled && player)
+        TC9PlayerOps::OnCharacterLoggedIn(player);
+
     if (!_clusterModeEnabled || !player || !player->GetSession() || !player->GetSession()->IsBot())
         return;
 
