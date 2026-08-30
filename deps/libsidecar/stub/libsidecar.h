@@ -84,6 +84,9 @@ void TC9CharacterLoggedIn(uint64_t charGUID, const char* charName, uint8_t charR
 void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t charGuildID, uint32_t accountID);
 void TC9CharacterZoneChanged(uint64_t charGUID, uint32_t mapID, uint32_t areaID, uint32_t zoneID);
 void TC9CharacterLevelChanged(uint64_t charGUID, uint8_t level);
+void TC9CharacterVitalsUpdated(uint64_t charGUID, uint8_t level, uint32_t curHP,
+    uint32_t maxHP, uint8_t powerType, uint32_t curPower, uint32_t maxPower,
+    float posX, float posY, uint8_t isDead, uint8_t isGhost);
 int TC9GroupAcceptInvite(uint64_t playerGUID);
 int TC9GroupLeave(uint64_t playerGUID);
 int TC9GuildCreate(uint64_t leaderGUID, const char* name, uint64_t* guildID);

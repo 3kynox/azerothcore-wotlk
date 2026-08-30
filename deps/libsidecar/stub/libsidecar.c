@@ -134,6 +134,9 @@ void TC9CharacterLoggedOut(uint64_t charGUID, const char* charName, uint32_t cha
 // TC9CharacterZoneChanged/LevelChanged publish post-login field updates for in-process sessions (bots)
 void TC9CharacterZoneChanged(uint64_t charGUID, uint32_t mapID, uint32_t areaID, uint32_t zoneID) { panicWithTC9Unavailable("TC9CharacterZoneChanged"); }
 void TC9CharacterLevelChanged(uint64_t charGUID, uint8_t level) { panicWithTC9Unavailable("TC9CharacterLevelChanged"); }
+void TC9CharacterVitalsUpdated(uint64_t charGUID, uint8_t level, uint32_t curHP,
+    uint32_t maxHP, uint8_t powerType, uint32_t curPower, uint32_t maxPower,
+    float posX, float posY, uint8_t isDead, uint8_t isGhost) { panicWithTC9Unavailable("TC9CharacterVitalsUpdated"); }
 
 int TC9GroupAcceptInvite(uint64_t playerGUID) { panicWithTC9Unavailable("TC9GroupAcceptInvite"); return -1; }
 int TC9GroupLeave(uint64_t playerGUID) { panicWithTC9Unavailable("TC9GroupLeave"); return -1; }
